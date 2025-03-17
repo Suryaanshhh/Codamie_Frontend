@@ -1,3 +1,5 @@
+import { Login } from "./Login"
+
 export const HomePage = () => {
     return <div className="h-screen bg-[#FFB6C1] ">
         <div className="flex justify-between">
@@ -22,7 +24,9 @@ export const HomePage = () => {
             </div>
         </div>
 
-     
+        <div className="flex justify-center mt-30 ml-8">
+            <Login />
+        </div>
 
     </div>
 
