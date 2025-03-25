@@ -1,32 +1,32 @@
-export const LoveCard=({fileName,comment1,comment2,codeLine1,codeLine2,codeLine3,codeLine4,returnLine})=>{
+export const LoveCard=({fileName,importStatement,comment1,comment2,codeLine1,codeLine2,codeLine3,codeLine4,returnLine})=>{
   return  <div className="bg-white-300 h-[300px] w-[250px] rounded-2xl flex m-auto mb-16 shadow-2xl">
                <div className="flex flex-col m-2">
                <div className="font-bold text-pink-600">
-                    Love.js
+                    {fileName}
                 </div>
                 <div className="font-semibold mt-2">
-                    import heart from "ME"
+                    {importStatement}
                 </div>
                 <div className="font-semibold mt-2">
-                 // Always use const.
+                 {comment1}
                 </div>
                 <div className="font-semibold mt-2">
-                 // Because Love is constant.
+                 {comment2}
                 </div>
                 <div className="font-semibold mt-2">
-                 const Love = "You" ;
+                 {codeLine1}
                 </div>
                 <div className="font-semibold mt-2">
-                 heart.push(Love);
+                 {codeLine2}
                 </div>
                 <div className="font-semibold mt-2">
-                 heart.push(Affection);
+                 {codeLine3}
                 </div>
                 <div className="font-semibold mt-2">
-                 heart.push(care);
+                 {codeLine4}
                 </div>
                 <div className="font-semibold mt-2">
-                 return heart ;
+                 {returnLine}
                 </div>
                </div>
         </div>
