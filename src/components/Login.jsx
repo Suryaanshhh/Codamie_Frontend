@@ -11,9 +11,10 @@ export const Login = () => {
     userPassword: password
   }
 
- function userLogin() {
+  function userLogin() {
     axios.post("http://localhost:3000/loginUser", userDetails).then((response) => {
-      console.log(response)
+     const jwt= response.data.jsonWebToken
+      localStorage.setItem("Token",response.data.jsonWebToken)
       alert("UserLogged In")
     }).catch((err) => {
       console.log(err)
