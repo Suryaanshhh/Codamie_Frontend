@@ -17,8 +17,8 @@ const programmingLanguages = [
 
 export const UserProfile = () => {
     const token = localStorage.getItem("Token");
-    const decodedToken = jwtDecode(token);
-    console.log(decoded)
+    //const decodedToken = jwtDecode(token);
+   // console.log(decoded)
     const [selectedEmoji, setSelectedEmoji] = useState("");
     const [exp, setExp] = useState("")
     const [lang, setLang] = useState("")
@@ -42,8 +42,14 @@ export const UserProfile = () => {
 
 
 
-    const handleSubmit = () => {
-        axios.post(`http://localhost:3000/createUserProfile/${decodedToken.userId}`).then((res) => {
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        console.log(profile)
+        axios.post(`http://localhost:3000/createUserProfile`, profile, {
+            headers: {
+                Authorization: token
+            }
+        }).then((res) => {
             console.log(res.data)
             alert("UserProfile Created")
         })
