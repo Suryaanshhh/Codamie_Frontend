@@ -1,76 +1,137 @@
+import React, { useEffect, useRef, useState } from "react";
+import { CodeCard } from "./CodeCard";
+
 export const LoveCard = () => {
-    return <>
-        <Card fileName="Love.js" importStatement='import heart from "Me"'
-            comment1={"// Use const only"}
-            comment2={"// As love is constant"}
-            codeLine1={"const Love = You ;"}
-            codeLine2={"heart.push(Love);"}
-            codeLine3={"heart.push(Affection);"}
-            codeLine4={"heart.push(care);"}
-            returnLine={"return heart ;"}
-        />
-        <Card fileName="Us.js" importStatement='import bond from "Heart"'
-            comment1={"// Defined once only"}
-            comment2={"// As we are one"}
-            codeLine1={"const Us = You + Me;"}
-            codeLine2={"bond.push(Us);"}
-            codeLine3={"bond.push(Memories);"}
-            codeLine4={"bond.push(Moments);"}
-            returnLine={"return bond;"}
-        />
-        <Card fileName="Together.js" importStatement='import time from "Life"'
-            comment1={"// Loop runs always"}
-            comment2={"// As love never ends"}
-            codeLine1={"const Together = Forever;"}
-            codeLine2={"time.push(Together);"}
-            codeLine3={"time.push(Laughter);"}
-            codeLine4={"time.push(Happiness);"}
-            returnLine={"return time;"}
-        />
-        <Card fileName="Soul.js" importStatement='import destiny from "Fate"'
-            comment1={"// Matched once only"}
-            comment2={"// As we belong"}
-            codeLine1={"const Soul = You & Me;"}
-            codeLine2={"destiny.push(Soul);"}
-            codeLine3={"destiny.push(Heartbeat);"}
-            codeLine4={"destiny.push(Energy);"}
-            returnLine={"return destiny;"}
-        />
-    </>
-}
+  const scrollRef = useRef(null);
+  const [scrolling, setScrolling] = useState(true);
+  
+  const cards = [
+    {
+      fileName: "Love.js",
+      importStatement: 'import heart from "Me"',
+      comments: [
+        "// Use const only",
+        "// As love is constant",
+      ],
+      codeLines: [
+        "const Love = You;",
+        "heart.push(Love);",
+        "heart.push(Affection);",
+        "heart.push(Care);",
+      ],
+      returnLine: "return heart;",
+    },
+    {
+      fileName: "Us.js",
+      importStatement: 'import bond from "Heart"',
+      comments: [
+        "// Defined once only",
+        "// As we are one",
+      ],
+      codeLines: [
+        "const Us = You + Me;",
+        "bond.push(Us);",
+        "bond.push(Memories);",
+        "bond.push(Moments);",
+      ],
+      returnLine: "return bond;",
+    },
+    {
+      fileName: "Together.js",
+      importStatement: 'import time from "Life"',
+      comments: [
+        "// Loop runs always",
+        "// As love never ends",
+      ],
+      codeLines: [
+        "const Together = Forever;",
+        "time.push(Together);",
+        "time.push(Laughter);",
+        "time.push(Happiness);",
+      ],
+      returnLine: "return time;",
+    },
+    {
+      fileName: "Soul.js",
+      importStatement: 'import destiny from "Fate"',
+      comments: [
+        "// Matched once only",
+        "// As we belong",
+      ],
+      codeLines: [
+        "const Soul = You & Me;",
+        "destiny.push(Soul);",
+        "destiny.push(Heartbeat);",
+        "destiny.push(Energy);",
+      ],
+      returnLine: "return destiny;",
+    },
+  ];
 
-function Card({ fileName, importStatement, comment1, comment2, codeLine1, codeLine2, codeLine3, codeLine4, returnLine }) {
-    return <div className="bg-white-300 h-[300px] w-[250px] rounded-2xl flex m-auto mb-16 shadow-2xl mt-10">
-        <div className="flex flex-col m-2">
-            <div className="font-bold text-pink-600">
-                {fileName}
-            </div>
-            <div className="font-semibold mt-2">
-                {importStatement}
-            </div>
-            <div className="font-semibold mt-2">
-                {comment1}
-            </div>
-            <div className="font-semibold mt-2">
-                {comment2}
-            </div>
-            <div className="font-semibold mt-2">
-                {codeLine1}
-            </div>
-            <div className="font-semibold mt-2">
-                {codeLine2}
-            </div>
-            <div className="font-semibold mt-2">
-                {codeLine3}
-            </div>
-            <div className="font-semibold mt-2">
-                {codeLine4}
-            </div>
-            <div className="font-semibold mt-2">
-                {returnLine}
-            </div>
+  // Duplicate cards for infinite scrolling effect
+  const duplicatedCards = [...cards, ...cards, ...cards];
+  
+  useEffect(() => {
+    const scrollContainer = scrollRef.current;
+    if (!scrollContainer) return;
+    
+    let scrollPosition = 0;
+    let animationId;
+    
+    const scroll = () => {
+      if (!scrolling) return;
+      
+      scrollPosition += 0.5; // Adjust speed here
+      
+      // Reset position for infinite loop
+      if (scrollPosition >= scrollContainer.scrollWidth / 3) {
+        scrollPosition = 0;
+        scrollContainer.scrollLeft = scrollPosition;
+      } else {
+        scrollContainer.scrollLeft = scrollPosition;
+      }
+      
+      animationId = requestAnimationFrame(scroll);
+    };
+    
+    scroll();
+    
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, [scrolling]);
+
+  return (
+    <div className="flex flex-col items-center">
+      <h1 className="text-3xl font-bold text-center mb-8 text-rose-600">Our Love Story in Code</h1>
+      
+      <div 
+        className="relative w-full overflow-hidden py-8 mb-8"
+        onMouseEnter={() => setScrolling(false)}
+        onMouseLeave={() => setScrolling(true)}
+      >
+        {/* Gradient overlays for fade effect */}
+        <div className="absolute left-0 top-0 bottom-0 w-16 z-10 bg-gradient-to-r from-rose-50 to-transparent pointer-events-none"></div>
+        <div className="absolute right-0 top-0 bottom-0 w-16 z-10 bg-gradient-to-l from-rose-50 to-transparent pointer-events-none"></div>
+        
+        <div 
+          ref={scrollRef}
+          className="flex overflow-x-scroll scrollbar-hide py-4 px-16"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          <div className="flex gap-6">
+            {duplicatedCards.map((card, index) => (
+              <div 
+                key={`${card.fileName}-${index}`}
+                className="flex-shrink-0"
+                style={{ width: '250px' }}
+              >
+                <CodeCard {...card} />
+              </div>
+            ))}
+          </div>
         </div>
+      </div>
     </div>
-}
-
-
+  );
+};
