@@ -12,19 +12,19 @@ const DEFAULT_ITEMS = [
   {
     title: "Suryansh Dwivedi",
     description: "JavaScript Developer",
-    id: 1,
+    id: 2,
     icon: "🦹"
   },
   {
     title: "Suryansh Dwivedi",
     description: "JavaScript Developer",
-    id: 1,
+    id: 3,
     icon: "🦹"
   },
   {
     title: "Suryansh Dwivedi",
     description: "JavaScript Developer",
-    id: 1,
+    id: 4,
     icon: "🦹"
   },
 
@@ -53,6 +53,7 @@ export default function Carousel({
   const x = useMotionValue(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+
 
   const containerRef = useRef(null);
   useEffect(() => {
@@ -131,6 +132,12 @@ export default function Carousel({
         right: 0,
       },
     };
+
+  function addToMatch() {
+    console.log(carouselItems[currentIndex])
+  }
+
+
 
   return (
     <div
@@ -225,8 +232,8 @@ export default function Carousel({
         </div>
       </div>
       <div className="flex justify-between">
-        <button className="border border-green-500 rounded-2xl p-1 w-[100px] mt-2">Match</button>
-        <button className="border border-red-500 rounded-2xl p-1 w-[100px] mt-2">Unmatch</button>
+        <button onClick={addToMatch} className="border border-green-500 rounded-2xl p-1 w-[100px] mt-2">Match</button>
+        <button  className="border border-red-500 rounded-2xl p-1 w-[100px] mt-2">Unmatch</button>
       </div>
     </div>
   );
