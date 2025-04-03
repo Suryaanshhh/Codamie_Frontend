@@ -1,34 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import axios from "axios";
+let DEFAULT_ITEMS;
 
-const DEFAULT_ITEMS = [
-  {
-    title: "Suryansh Dwivedi",
-    description: "JavaScript Developer",
-    id: 1,
-    icon: "🦹"
-  },
-  {
-    title: "Suryansh Dwivedi",
-    description: "JavaScript Developer",
-    id: 2,
-    icon: "🦹"
-  },
-  {
-    title: "Suryansh Dwivedi",
-    description: "JavaScript Developer",
-    id: 3,
-    icon: "🦹"
-  },
-  {
-    title: "Suryansh Dwivedi",
-    description: "JavaScript Developer",
-    id: 4,
-    icon: "🦹"
-  },
+axios.get("http://localhost:3000/showProfiles").then((response) => {
+  DEFAULT_ITEMS = response.data.profile
+})
 
-];
+
 
 const DRAG_BUFFER = 0;
 const VELOCITY_THRESHOLD = 500;
@@ -44,10 +23,10 @@ export default function Carousel({
   loop = false,
   round = false,
 }) {
+
   const containerPadding = 16;
   const itemWidth = baseWidth - containerPadding * 2;
   const trackItemOffset = itemWidth + GAP;
-
   const carouselItems = loop ? [...items, items[0]] : items;
   const [currentIndex, setCurrentIndex] = useState(0);
   const x = useMotionValue(0);
@@ -168,6 +147,8 @@ export default function Carousel({
         onAnimationComplete={handleAnimationComplete}
       >
         {carouselItems.map((item, index) => {
+          console.log(index)
+          console.log(item)
           const range = [
             -(index + 1) * trackItemOffset,
             -index * trackItemOffset,
@@ -193,12 +174,12 @@ export default function Carousel({
             >
               <div className={`${round ? "p-0 m-0" : "mb-4 p-5"}`}>
                 <span className="flex h-[28px] w-[28px] items-center justify-center rounded-full bg-[#060606]">
-                  {item.icon}
+                  {item.Avatar}
                 </span>
               </div>
               <div className="p-5">
                 <div className="mb-1 font-black text-lg text-white">
-                  {item.title}
+                  {item.Gender}
                 </div>
                 <p className="text-sm text-white">{item.description}</p>
               </div>
@@ -233,7 +214,7 @@ export default function Carousel({
       </div>
       <div className="flex justify-between">
         <button onClick={addToMatch} className="border border-green-500 rounded-2xl p-1 w-[100px] mt-2">Match</button>
-        <button  className="border border-red-500 rounded-2xl p-1 w-[100px] mt-2">Unmatch</button>
+        <button className="border border-red-500 rounded-2xl p-1 w-[100px] mt-2">Unmatch</button>
       </div>
     </div>
   );

@@ -25,6 +25,7 @@ export const UserProfile = () => {
     const [interest, setInterest] = useState([])
     const [interestField, setInterestfield] = useState("")
     const [about, setAbout] = useState("")
+    const [gender, setGender] = useState("")
 
 
     const profile = {
@@ -32,7 +33,8 @@ export const UserProfile = () => {
         CodingExperience: exp,
         CodingLanguage: lang,
         Interest: interest,
-        Biodata: about
+        Biodata: about,
+        Gender: gender
     }
 
     const handleEmojiSelect = (emoji) => {
@@ -88,9 +90,9 @@ export const UserProfile = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-100 flex items-center justify-center p-6">
+        <div className="min-h-screen bg-gradient-to-br flex items-center justify-center p-6">
             <div className="w-full max-w-2xl bg-white shadow-2xl rounded-2xl overflow-hidden">
-                <div className="bg-gradient-to-r from-pink-500 to-purple-600 p-6 text-center">
+                <div className="bg-gradient-to-r from-black to-purple-600 p-6 text-center">
                     <h1 className="text-3xl font-bold text-white flex items-center justify-center">
                         <Heart className="mr-3 text-white" />
                         Create Your Coder Cupid Profile
@@ -109,8 +111,8 @@ export const UserProfile = () => {
                                     type="button"
                                     onClick={() => handleEmojiSelect(emoji)}
                                     className={`text-6xl p-2 rounded-lg transition-all duration-300 ${selectedEmoji === emoji
-                                        ? 'bg-purple-200 border-4 border-purple-500 scale-110'
-                                        : 'hover:bg-pink-100'
+                                        ? 'bg-purple-200 border-4 border-black scale-110'
+                                        : 'hover:bg-gray-100'
                                         }`}
                                 >
                                     {emoji}
@@ -124,6 +126,22 @@ export const UserProfile = () => {
                         )}
                     </div>
 
+                    {/* Gender Selection */}
+                    <div>
+                        <label className="block mb-2 text-gray-700">Gender</label>
+                        <select 
+                            onChange={(e) => setGender(e.target.value)}
+                            name="gender"
+                            className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+                            required
+                        >
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+
+                        </select>
+                    </div>
+
                     {/* Coding Details */}
                     <div className="grid md:grid-cols-2 gap-4">
                         <div>
@@ -132,7 +150,7 @@ export const UserProfile = () => {
                                 setExp(e.target.value)
                             }}
                                 name="experience"
-                                className="w-full p-3 border-2 border-pink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+                                className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                                 required
                             >
                                 <option value="">Select Experience Level</option>
@@ -147,7 +165,7 @@ export const UserProfile = () => {
                                 setLang(e.target.value)
                             }}
                                 name="favoriteLanguage"
-                                className="w-full p-3 border-2 border-pink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+                                className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                                 required
                             >
                                 <option value="">Select Your Favorite Language</option>
@@ -170,7 +188,7 @@ export const UserProfile = () => {
                                 value={interestField}
                                 type="text"
                                 name="newInterest"
-                                className="w-full p-3 border-2 border-pink-200 rounded-lg mr-2 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                                className="w-full p-3 border-2 border-gray-200 rounded-lg mr-2 focus:outline-none focus:ring-2 focus:ring-black"
                                 placeholder="Add an interest"
                             />
                             <button onClick={addInterest}
@@ -183,12 +201,12 @@ export const UserProfile = () => {
                         {/* Added interests display */}
                         <div className="flex flex-wrap gap-2 mt-2">
                             {interest.map((item, index) => (
-                                <div key={index} className="bg-pink-100 text-pink-800 px-3 py-1 rounded-full flex items-center">
+                                <div key={index} className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full flex items-center">
                                     {item}
                                     <button
                                         type="button"
                                         onClick={() => removeInterest(item)}
-                                        className="ml-2 text-pink-600 hover:text-pink-800"
+                                        className="ml-2 text-gray-600 hover:text-black"
                                     >
                                         ×
                                     </button>
@@ -204,7 +222,7 @@ export const UserProfile = () => {
                             setAbout(e.target.value)
                         }}
                             name="bio"
-                            className="w-full p-3 border-2 border-pink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400"
+                            className="w-full p-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                             rows="4"
                             placeholder="Share your coding passion, dreams, and what you're looking for in a partner..."
                         />
@@ -214,7 +232,7 @@ export const UserProfile = () => {
                     <div className="text-center">
                         <button
                             type="submit"
-                            className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-3 rounded-full hover:from-pink-600 hover:to-purple-700 transition transform hover:scale-105 shadow-lg"
+                            className="bg-gradient-to-r from-black to-purple-600 text-white px-8 py-3 rounded-full hover:from-gray-800 hover:to-purple-700 transition transform hover:scale-105 shadow-lg"
                         >
                             Create Codamie Profile
                         </button>

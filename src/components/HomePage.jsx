@@ -1,10 +1,33 @@
 import BlurText from "./Blurtext";
 import ProfileCard from "./ProifleCard";
 import MatchesList from "./MatchesList";
+import MatchRequestList from "./MatchesRequest"
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 const handleAnimationComplete = () => {
   console.log('Animation completed!');
 };
+
+  // Handler for accepting a request
+  const handleAccept = (request) => {
+    console.log('Request accepted:', request);
+    // Add your logic for accepting a request
+    // For example: update database, show notification, etc.
+  };
+
+  // Handler for rejecting a request
+  const handleReject = (request) => {
+    console.log('Request rejected:', request);
+    // Add your logic for rejecting a request
+  };
+
+  // Optional: handler for when an item is selected
+  const handleItemSelect = (item, index) => {
+    console.log('Item selected:', item, 'at index:', index);
+    // For example: show more details about this person
+  };
+
 
 // Sample items with the structure compatible with our styled MatchesList
 const matchItems = [
@@ -20,7 +43,43 @@ const matchItems = [
   { title: 'Michael Brown', description: 'Mobile Developer', id: 10, icon: '📱' }
 ];
 
+const matchRequests = [
+  { 
+    title: 'Suryansh Dwivedi', 
+    description: 'Wants to connect with you', 
+    id: 1, 
+    icon: '🦹', 
+    requestTime: '2h ago' 
+  },
+  { 
+    title: 'Suryansh Dwivedi', 
+    description: 'Wants to connect with you', 
+    id: 1, 
+    icon: '🦹', 
+    requestTime: '2h ago' 
+  },
+  { 
+    title: 'Suryansh Dwivedi', 
+    description: 'Wants to connect with you', 
+    id: 1, 
+    icon: '🦹', 
+    requestTime: '2h ago' 
+  },
+  // Add more requests as needed
+];
+
 export const Homepage = () => {
+
+const [profileItem,setProfileItem]=useState([])
+useEffect(()=>{
+  axios.get("http://localhost:3000/showProfiles").then((response)=>{
+    console.log(response.data.profile)
+    setProfileItem(response.data.profile)
+    console.log(profileItem)
+  })
+},[])
+
+
   return (
     <div className="min-h-screen bg-rose-50">
       {/* Header section with blurred text */}
@@ -41,7 +100,7 @@ export const Homepage = () => {
         <div className="flex flex-col items-center">
           <h2 className="text-xl font-semibold mb-6 text-center">Discover Profiles</h2>
           <div style={{ height: '600px', position: 'relative' }}>
-            <ProfileCard
+            <ProfileCard 
               baseWidth={350}
               autoplay={false}
               autoplayDelay={3000}
@@ -51,6 +110,21 @@ export const Homepage = () => {
             />
           </div>
         </div>
+
+        <div className="flex flex-col items-center">
+        <h2 className="text-xl font-semibold mb-6 text-center">Your Matches</h2>
+        <div style={{ height: '600px', position: 'relative' }}>
+          <MatchRequestList
+            requests={matchRequests}
+            onRequestAccept={handleAccept}
+            onRequestReject={handleReject}
+            onItemSelect={handleItemSelect}
+            enableArrowNavigation={true}
+            showGradients={true}
+          />
+          </div>
+        </div>
+
 
         {/* Matches List Container */}
         <div className="flex flex-col items-center">

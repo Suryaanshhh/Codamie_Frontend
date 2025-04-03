@@ -6,6 +6,8 @@ import { Signup } from "./Signup";
 import { LoveCard } from "./LoveCard";
 import { AboutUs } from "./AboutUs";
 import { Contact } from "./Contact";
+import { UserProfile } from "./UserProfile";
+
 
 export const NavBar = () => {
   return (
@@ -19,6 +21,7 @@ export const NavBar = () => {
             <Route path="/signup" element={<Signup />} />
             <Route path="/about" element={<AboutUs />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/userProfile" element={<UserProfile/>}/>
           </Routes>
         </div>
       </BrowserRouter>
