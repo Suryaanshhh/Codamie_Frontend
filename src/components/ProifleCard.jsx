@@ -1,21 +1,54 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import axios from "axios";
-let DEFAULT_ITEMS;
-
-axios.get("http://localhost:3000/showProfiles").then((response) => {
-  DEFAULT_ITEMS = response.data.profile
-})
-
-
 
 const DRAG_BUFFER = 0;
 const VELOCITY_THRESHOLD = 500;
 const GAP = 16;
 const SPRING_OPTIONS = { type: "spring", stiffness: 300, damping: 30 };
 
+// Create a separate component for carousel items to properly handle the hooks
+const CarouselItem = ({ item, index, x, itemWidth, trackItemOffset, round, effectiveTransition }) => {
+  const range = [
+    -(index + 1) * trackItemOffset,
+    -index * trackItemOffset,
+    -(index - 1) * trackItemOffset,
+  ];
+  const outputRange = [90, 0, -90];
+  const rotateY = useTransform(x, range, outputRange, { clamp: false });
+
+  return (
+    <motion.div
+      className={`relative shrink-0 flex flex-col ${
+        round
+          ? "items-center justify-center text-center bg-[#060606] border-0"
+          : "items-start justify-between bg-[#222] border border-[#222] rounded-[12px]"
+      } overflow-hidden cursor-grab active:cursor-grabbing`}
+      style={{
+        width: itemWidth,
+        height: round ? itemWidth : "100%",
+        rotateY: rotateY,
+        ...(round && { borderRadius: "50%" }),
+      }}
+      transition={effectiveTransition}
+    >
+      <div className={`${round ? "p-0 m-0" : "mb-4 p-5"}`}>
+        <span className="flex h-[28px] w-[28px] items-center justify-center rounded-full bg-[#060606]">
+          {item.Avatar}
+        </span>
+      </div>
+      <div className="p-5">
+        <div className="mb-1 font-black text-lg text-white">
+          {item.Name}
+        </div>
+        <p className="text-sm text-white">{`A ${item.CodingLanguage} Developer`}</p>
+      </div>
+    </motion.div>
+  );
+};
+
 export default function Carousel({
-  items = DEFAULT_ITEMS,
+  items: propItems = [],
   baseWidth = 300,
   autoplay = false,
   autoplayDelay = 3000,
@@ -23,16 +56,41 @@ export default function Carousel({
   loop = false,
   round = false,
 }) {
+  const [profileItems, setProfileItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Determine which items to use - API data or prop data
+  const items = profileItems.length > 0 ? profileItems : propItems;
+  
+  useEffect(() => {
+    setLoading(true);
+    axios.get("http://localhost:3000/showProfiles")
+      .then((response) => {
+        console.log("API Response:", response.data.profile); // Debugging
+        if (response.data.profile && Array.isArray(response.data.profile)) {
+          setProfileItems(response.data.profile);
+        } else {
+          console.warn("API did not return an array of profiles");
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching profiles:", error);
+        setError("Failed to fetch profiles");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
 
   const containerPadding = 16;
   const itemWidth = baseWidth - containerPadding * 2;
   const trackItemOffset = itemWidth + GAP;
-  const carouselItems = loop ? [...items, items[0]] : items;
+  const carouselItems = items.length > 0 ? (loop ? [...items, items[0]] : items) : [];
   const [currentIndex, setCurrentIndex] = useState(0);
   const x = useMotionValue(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
-
 
   const containerRef = useRef(null);
   useEffect(() => {
@@ -50,7 +108,7 @@ export default function Carousel({
   }, [pauseOnHover]);
 
   useEffect(() => {
-    if (autoplay && (!pauseOnHover || !isHovered)) {
+    if (autoplay && (!pauseOnHover || !isHovered) && items.length > 0) {
       const timer = setInterval(() => {
         setCurrentIndex((prev) => {
           if (prev === items.length - 1 && loop) {
@@ -113,18 +171,71 @@ export default function Carousel({
     };
 
   function addToMatch() {
-    console.log(carouselItems[currentIndex])
+    if (carouselItems.length > 0 && currentIndex < carouselItems.length) {
+      console.log("Adding to match:", carouselItems[currentIndex]);
+      // Your match logic here
+    } else {
+      console.warn("No item to match at current index");
+    }
   }
 
+  // Show loading state
+  if (loading && items.length === 0) {
+    return (
+      <div
+        className={`relative overflow-hidden p-4 flex items-center justify-center ${
+          round ? "rounded-full border border-white" : "rounded-[24px] border border-[#222]"
+        }`}
+        style={{
+          width: `${baseWidth}px`,
+          height: round ? `${baseWidth}px` : "200px",
+        }}
+      >
+        <p>Loading profiles...</p>
+      </div>
+    );
+  }
 
+  // Show error state
+  if (error && items.length === 0) {
+    return (
+      <div
+        className={`relative overflow-hidden p-4 flex items-center justify-center ${
+          round ? "rounded-full border border-white" : "rounded-[24px] border border-[#222]"
+        }`}
+        style={{
+          width: `${baseWidth}px`,
+          height: round ? `${baseWidth}px` : "200px",
+        }}
+      >
+        <p>Error loading profiles. Please try again later.</p>
+      </div>
+    );
+  }
+
+  // Show empty state
+  if (items.length === 0) {
+    return (
+      <div
+        className={`relative overflow-hidden p-4 flex items-center justify-center ${
+          round ? "rounded-full border border-white" : "rounded-[24px] border border-[#222]"
+        }`}
+        style={{
+          width: `${baseWidth}px`,
+          height: round ? `${baseWidth}px` : "200px",
+        }}
+      >
+        <p>No profiles available.</p>
+      </div>
+    );
+  }
 
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden p-4 ${round
-        ? "rounded-full border border-white"
-        : "rounded-[24px] border border-[#222]"
-        }`}
+      className={`relative overflow-hidden p-4 ${
+        round ? "rounded-full border border-white" : "rounded-[24px] border border-[#222]"
+      }`}
       style={{
         width: `${baseWidth}px`,
         ...(round && { height: `${baseWidth}px` }),
@@ -146,63 +257,37 @@ export default function Carousel({
         transition={effectiveTransition}
         onAnimationComplete={handleAnimationComplete}
       >
-        {carouselItems.map((item, index) => {
-          console.log(index)
-          console.log(item)
-          const range = [
-            -(index + 1) * trackItemOffset,
-            -index * trackItemOffset,
-            -(index - 1) * trackItemOffset,
-          ];
-          const outputRange = [90, 0, -90];
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const rotateY = useTransform(x, range, outputRange, { clamp: false });
-          return (
-            <motion.div
-              key={index}
-              className={`relative shrink-0 flex flex-col ${round
-                ? "items-center justify-center text-center bg-[#060606] border-0"
-                : "items-start justify-between bg-[#222] border border-[#222] rounded-[12px]"
-                } overflow-hidden cursor-grab active:cursor-grabbing`}
-              style={{
-                width: itemWidth,
-                height: round ? itemWidth : "100%",
-                rotateY: rotateY,
-                ...(round && { borderRadius: "50%" }),
-              }}
-              transition={effectiveTransition}
-            >
-              <div className={`${round ? "p-0 m-0" : "mb-4 p-5"}`}>
-                <span className="flex h-[28px] w-[28px] items-center justify-center rounded-full bg-[#060606]">
-                  {item.Avatar}
-                </span>
-              </div>
-              <div className="p-5">
-                <div className="mb-1 font-black text-lg text-white">
-                  {item.Gender}
-                </div>
-                <p className="text-sm text-white">{item.description}</p>
-              </div>
-            </motion.div>
-          );
-        })}
+        {carouselItems.map((item, index) => (
+          <CarouselItem
+            key={index}
+            item={item}
+            index={index}
+            x={x}
+            itemWidth={itemWidth}
+            trackItemOffset={trackItemOffset}
+            round={round}
+            effectiveTransition={effectiveTransition}
+          />
+        ))}
       </motion.div>
       <div
-        className={`flex w-full justify-center ${round ? "absolute z-20 bottom-12 left-1/2 -translate-x-1/2" : ""
-          }`}
+        className={`flex w-full justify-center ${
+          round ? "absolute z-20 bottom-12 left-1/2 -translate-x-1/2" : ""
+        }`}
       >
         <div className="mt-4 flex w-[150px] justify-between px-8">
           {items.map((_, index) => (
             <motion.div
               key={index}
-              className={`h-2 w-2 rounded-full cursor-pointer transition-colors duration-150 ${currentIndex % items.length === index
-                ? round
-                  ? "bg-white"
-                  : "bg-[#333333]"
-                : round
-                  ? "bg-[#555]"
-                  : "bg-[rgba(51,51,51,0.4)]"
-                }`}
+              className={`h-2 w-2 rounded-full cursor-pointer transition-colors duration-150 ${
+                currentIndex % items.length === index
+                  ? round
+                    ? "bg-white"
+                    : "bg-[#333333]"
+                  : round
+                    ? "bg-[#555]"
+                    : "bg-[rgba(51,51,51,0.4)]"
+              }`}
               animate={{
                 scale: currentIndex % items.length === index ? 1.2 : 1,
               }}

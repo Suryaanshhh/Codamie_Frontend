@@ -70,14 +70,7 @@ const matchRequests = [
 
 export const Homepage = () => {
 
-const [profileItem,setProfileItem]=useState([])
-useEffect(()=>{
-  axios.get("http://localhost:3000/showProfiles").then((response)=>{
-    console.log(response.data.profile)
-    setProfileItem(response.data.profile)
-    console.log(profileItem)
-  })
-},[])
+
 
 
   return (
