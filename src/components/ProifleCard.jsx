@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
+import { useNavigate,useSearchParams } from 'react-router-dom';
 import axios from "axios";
 
 const DRAG_BUFFER = 0;
@@ -59,13 +60,16 @@ export default function Carousel({
   const [profileItems, setProfileItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+   const [searchParams] = useSearchParams();
+      const token = searchParams.get("token");
+      localStorage.setItem("Token", token);
+      
   // Determine which items to use - API data or prop data
   const items = profileItems.length > 0 ? profileItems : propItems;
   
   useEffect(() => {
     setLoading(true);
-    axios.get("http://localhost:3000/showProfiles")
+    axios.get("http://localhost:3000/showProfiles",{headers:{Authorization:token}})
       .then((response) => {
         console.log("API Response:", response.data.profile); // Debugging
         if (response.data.profile && Array.isArray(response.data.profile)) {

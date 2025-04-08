@@ -72,8 +72,14 @@ const matchRequests = [
 export const Homepage = () => {
   const [searchParams] = useSearchParams();
     const token = searchParams.get("token");
+  const token2=localStorage.getItem("Token")
+  console.log(token2)
+  if(token){
     localStorage.setItem("Token", token);
-
+  }
+  else{
+    localStorage.setItem("Token", token2);
+  }
 
 
 
@@ -84,6 +90,7 @@ useEffect(() => {
     .get('http://localhost:3000/showMatchRequests', {
       headers: { Authorization: token }
     })
+    
     .then(res => {
       console.log('Fetched Data:', res.data);
 

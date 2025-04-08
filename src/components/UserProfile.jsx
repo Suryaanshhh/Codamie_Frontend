@@ -19,9 +19,16 @@ const programmingLanguages = [
 
 export const UserProfile = () => {
     const navigate=useNavigate()
-  const [searchParams] = useSearchParams();
+    const [searchParams] = useSearchParams();
     const token = searchParams.get("token");
+  const token2=localStorage.getItem("Token")
+  console.log(token2)
+  if(token){
     localStorage.setItem("Token", token);
+  }
+  else{
+    localStorage.setItem("Token", token2);
+  }
     
     //const decodedToken = jwtDecode(token);
    // console.log(decoded)
