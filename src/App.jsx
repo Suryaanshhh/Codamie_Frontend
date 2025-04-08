@@ -6,7 +6,7 @@ import { UserProfile } from './components/UserProfile'
 
 function App() {
   return (
-    <Homepage/>
+    <NavBar/>
   )
 }
 

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Heart, Code } from 'lucide-react';
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { useNavigate } from 'react-router-dom';
 const emojis = [
     '👨‍💻', '🤓', '😎',
     '👽', '🦸', '🦹',
@@ -16,6 +17,8 @@ const programmingLanguages = [
 ];
 
 export const UserProfile = () => {
+    const navigate=useNavigate()
+
     const token = localStorage.getItem("Token");
     //const decodedToken = jwtDecode(token);
    // console.log(decoded)
@@ -53,7 +56,7 @@ export const UserProfile = () => {
             }
         }).then((res) => {
             console.log(res.data)
-            alert("UserProfile Created")
+            navigate("/homePage")
         })
     }
 

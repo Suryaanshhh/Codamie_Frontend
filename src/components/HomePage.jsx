@@ -70,9 +70,7 @@ const matchRequests = [
 
 export const Homepage = () => {
 
-
-
-
+ 
   return (
     <div className="min-h-screen bg-rose-50">
       {/* Header section with blurred text */}

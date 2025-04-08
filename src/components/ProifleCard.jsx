@@ -6,7 +6,7 @@ const DRAG_BUFFER = 0;
 const VELOCITY_THRESHOLD = 500;
 const GAP = 16;
 const SPRING_OPTIONS = { type: "spring", stiffness: 300, damping: 30 };
-
+const token=localStorage.getItem("Token")
 // Create a separate component for carousel items to properly handle the hooks
 const CarouselItem = ({ item, index, x, itemWidth, trackItemOffset, round, effectiveTransition }) => {
   const range = [
@@ -173,7 +173,15 @@ export default function Carousel({
   function addToMatch() {
     if (carouselItems.length > 0 && currentIndex < carouselItems.length) {
       console.log("Adding to match:", carouselItems[currentIndex]);
-      // Your match logic here
+      axios.post("http://localhost:3000/createMatchRequest",carouselItems[currentIndex],{
+        headers: {
+          Authorization: token
+      }
+      }).then((response)=>{
+        alert("Match sent")
+      }).catch((err)=>{
+        console.log(err)
+      })
     } else {
       console.warn("No item to match at current index");
     }
