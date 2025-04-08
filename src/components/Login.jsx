@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate,useSearchParams } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -29,17 +31,24 @@ export const Login = () => {
     axios.post("http://localhost:3000/loginUser", userDetails)
       .then((response) => {
         const jwt = response.data.jsonWebToken;
+        
         if(jwt){
           localStorage.setItem("Token", jwt);
         }
         else{
           localStorage.setItem("Token", token);
         }
-        
+
+        const decode=jwtDecode(localStorage.getItem("Token"))
         // Show success animation
         setLoading(false);
         setTimeout(() => {
-          navigate("/userProfile");
+          if(decode.profile==true){
+            navigate("/homePage")
+          }
+          else{
+            navigate("/userProfile");
+          }
         }, 500);
       })
       .catch((err) => {

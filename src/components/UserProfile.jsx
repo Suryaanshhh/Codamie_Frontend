@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Heart, Code } from 'lucide-react';
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,useSearchParams } from 'react-router-dom';
+
 const emojis = [
     '👨‍💻', '🤓', '😎',
     '👽', '🦸', '🦹',
@@ -18,8 +19,10 @@ const programmingLanguages = [
 
 export const UserProfile = () => {
     const navigate=useNavigate()
-
-    const token = localStorage.getItem("Token");
+  const [searchParams] = useSearchParams();
+    const token = searchParams.get("token");
+    localStorage.setItem("Token", token);
+    
     //const decodedToken = jwtDecode(token);
    // console.log(decoded)
     const [selectedEmoji, setSelectedEmoji] = useState("");

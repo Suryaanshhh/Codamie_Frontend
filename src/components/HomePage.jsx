@@ -3,6 +3,7 @@ import ProfileCard from "./ProifleCard";
 import MatchesList from "./MatchesList";
 import MatchRequestList from "./MatchesRequest"
 import { useEffect, useState } from "react";
+import { useNavigate,useSearchParams } from "react-router-dom";
 import axios from "axios";
 
 const handleAnimationComplete = () => {
@@ -69,8 +70,10 @@ const matchRequests = [
 ];
 
 export const Homepage = () => {
-
- 
+  const [searchParams] = useSearchParams();
+    const token = searchParams.get("token");
+    localStorage.setItem("Token", token);
+  
   return (
     <div className="min-h-screen bg-rose-50">
       {/* Header section with blurred text */}
