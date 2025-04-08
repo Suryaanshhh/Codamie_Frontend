@@ -73,7 +73,40 @@ export const Homepage = () => {
   const [searchParams] = useSearchParams();
     const token = searchParams.get("token");
     localStorage.setItem("Token", token);
-  
+
+
+
+
+const [requests, setRequests] = useState([]);
+
+useEffect(() => {
+  axios
+    .get('http://localhost:3000/showMatchRequests', {
+      headers: { Authorization: token }
+    })
+    .then(res => {
+      console.log('Fetched Data:', res.data);
+
+      // Extract the array from the object
+      const users = res.data.allMatches || [];
+
+      // Format each item for your component
+      const formatted = users.map(user => ({
+        ...user,
+        title: user.Name,
+        description: user.Biodata || 'Wants to connect with you',
+        icon: user.Avatar || '👤',
+        requestTime: '2h ago' // replace with logic using user.createdAt if needed
+      }));
+
+      setRequests(formatted);
+    })
+    .catch(err => {
+      console.error('❌ Error fetching match requests:', err);
+    });
+}, []);
+
+
   return (
     <div className="min-h-screen bg-rose-50">
       {/* Header section with blurred text */}
@@ -108,8 +141,8 @@ export const Homepage = () => {
         <div className="flex flex-col items-center">
         <h2 className="text-xl font-semibold mb-6 text-center">Your Matches</h2>
         <div style={{ height: '600px', position: 'relative' }}>
-          <MatchRequestList
-            requests={matchRequests}
+          <MatchRequestList 
+            requests={requests}
             onRequestAccept={handleAccept}
             onRequestReject={handleReject}
             onItemSelect={handleItemSelect}
