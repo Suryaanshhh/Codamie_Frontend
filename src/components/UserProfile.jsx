@@ -60,9 +60,11 @@ export const UserProfile = () => {
     const handleSubmit = (e) => {
         e.preventDefault()
         console.log(profile)
+        const jwt=localStorage.getItem("Token")
+        console.log(jwt)
         axios.post(`http://localhost:3000/createUserProfile`, profile, {
             headers: {
-                Authorization: token
+                Authorization: jwt
             }
         }).then((res) => {
             console.log(res.data)

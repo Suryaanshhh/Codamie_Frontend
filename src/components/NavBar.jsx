@@ -97,7 +97,7 @@ function Appbar() {
           onClick={() => navigate(profile.isLoggedIn ? "/homePage" : "/")}
           className="transition-transform duration-300 hover:scale-105 focus:outline-none"
         >
-          <img src={logo} className="h-20 drop-shadow-md" alt="Logo" />
+          <img src={logo} className="h-20 drop-shadow-md ml-19" alt="Logo" />
         </button>
         
         <div className="flex gap-3">

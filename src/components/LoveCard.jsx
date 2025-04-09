@@ -103,7 +103,7 @@ export const LoveCard = () => {
 
   return (
     <div className="flex flex-col items-center">
-      <h1 className="text-3xl font-bold text-center mb-8 text-rose-600">Our Love Story in Code</h1>
+      <h1 className="text-3xl font-bold text-center mb-8 text-black">Your Love Story in Code</h1>
       
       <div 
         className="relative w-full overflow-hidden py-8 mb-8"

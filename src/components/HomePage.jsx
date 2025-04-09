@@ -117,7 +117,7 @@ useEffect(() => {
   return (
     <div className="min-h-screen bg-rose-50">
       {/* Header section with blurred text */}
-      <div className="pt-16 pb-12">
+      <div className=" pb-12">
         <BlurText
           text="Welcome to Codamie"
           delay={150}
