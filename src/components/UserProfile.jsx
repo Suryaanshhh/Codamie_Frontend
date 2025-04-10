@@ -18,18 +18,25 @@ const programmingLanguages = [
 ];
 
 export const UserProfile = () => {
-    const navigate=useNavigate()
+    const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const token = searchParams.get("token");
-  const token2=localStorage.getItem("Token")
-  console.log(token2)
-  if(token){
-    localStorage.setItem("Token", token);
-  }
-  else{
-    localStorage.setItem("Token", token2);
-  }
     
+    // Get token from localStorage if not in URL params
+    const storedToken = localStorage.getItem("Token");
+    
+    // Use URL token if available, otherwise use stored token
+    useEffect(() => {
+        if (token) {
+            localStorage.setItem("Token", token);
+        } else if (!storedToken) {
+            // If no token at all, redirect to login
+            navigate("/login");
+        }
+        else{
+            localStorage.setItem("Token",storedToken)
+        }
+    }, [token, storedToken, navigate]);
     //const decodedToken = jwtDecode(token);
    // console.log(decoded)
     const [selectedEmoji, setSelectedEmoji] = useState("");
@@ -68,6 +75,7 @@ export const UserProfile = () => {
             }
         }).then((res) => {
             console.log(res.data)
+            localStorage.setItem("Token",res.data.token)
             navigate("/homePage")
         })
     }

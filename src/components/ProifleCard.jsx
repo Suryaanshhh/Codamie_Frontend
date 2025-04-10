@@ -1,13 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
-import { useNavigate,useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from "axios";
 
 const DRAG_BUFFER = 0;
 const VELOCITY_THRESHOLD = 500;
 const GAP = 16;
 const SPRING_OPTIONS = { type: "spring", stiffness: 300, damping: 30 };
-const token=localStorage.getItem("Token")
+const token = localStorage.getItem("Token")
 // Create a separate component for carousel items to properly handle the hooks
 const CarouselItem = ({ item, index, x, itemWidth, trackItemOffset, round, effectiveTransition }) => {
   const range = [
@@ -20,11 +20,10 @@ const CarouselItem = ({ item, index, x, itemWidth, trackItemOffset, round, effec
 
   return (
     <motion.div
-      className={`relative shrink-0 flex flex-col ${
-        round
+      className={`relative shrink-0 flex flex-col ${round
           ? "items-center justify-center text-center bg-[#060606] border-0"
           : "items-start justify-between bg-[#222] border border-[#222] rounded-[12px]"
-      } overflow-hidden cursor-grab active:cursor-grabbing`}
+        } overflow-hidden cursor-grab active:cursor-grabbing`}
       style={{
         width: itemWidth,
         height: round ? itemWidth : "100%",
@@ -60,16 +59,24 @@ export default function Carousel({
   const [profileItems, setProfileItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-   const [searchParams] = useSearchParams();
-      const token = searchParams.get("token");
-      localStorage.setItem("Token", token);
-      
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
+  const storageToken = localStorage.getItem("Token")
+  if (token) {
+    localStorage.setItem("Token", token);
+  }
+  else {
+    localStorage.setItem("Token", storageToken);
+  }
+
+
   // Determine which items to use - API data or prop data
   const items = profileItems.length > 0 ? profileItems : propItems;
-  
+
   useEffect(() => {
+    const jwt=localStorage.getItem("Token")
     setLoading(true);
-    axios.get("http://localhost:3000/showProfiles",{headers:{Authorization:token}})
+    axios.get("http://localhost:3000/showProfiles", { headers: { Authorization: jwt} })
       .then((response) => {
         console.log("API Response:", response.data.profile); // Debugging
         if (response.data.profile && Array.isArray(response.data.profile)) {
@@ -177,13 +184,13 @@ export default function Carousel({
   function addToMatch() {
     if (carouselItems.length > 0 && currentIndex < carouselItems.length) {
       console.log("Adding to match:", carouselItems[currentIndex]);
-      axios.post("http://localhost:3000/createMatchRequest",carouselItems[currentIndex],{
+      axios.post("http://localhost:3000/createMatchRequest", carouselItems[currentIndex], {
         headers: {
           Authorization: token
-      }
-      }).then((response)=>{
+        }
+      }).then((response) => {
         alert("Match sent")
-      }).catch((err)=>{
+      }).catch((err) => {
         console.log(err)
       })
     } else {
@@ -195,9 +202,8 @@ export default function Carousel({
   if (loading && items.length === 0) {
     return (
       <div
-        className={`relative overflow-hidden p-4 flex items-center justify-center ${
-          round ? "rounded-full border border-white" : "rounded-[24px] border border-[#222]"
-        }`}
+        className={`relative overflow-hidden p-4 flex items-center justify-center ${round ? "rounded-full border border-white" : "rounded-[24px] border border-[#222]"
+          }`}
         style={{
           width: `${baseWidth}px`,
           height: round ? `${baseWidth}px` : "200px",
@@ -212,9 +218,8 @@ export default function Carousel({
   if (error && items.length === 0) {
     return (
       <div
-        className={`relative overflow-hidden p-4 flex items-center justify-center ${
-          round ? "rounded-full border border-white" : "rounded-[24px] border border-[#222]"
-        }`}
+        className={`relative overflow-hidden p-4 flex items-center justify-center ${round ? "rounded-full border border-white" : "rounded-[24px] border border-[#222]"
+          }`}
         style={{
           width: `${baseWidth}px`,
           height: round ? `${baseWidth}px` : "200px",
@@ -229,9 +234,8 @@ export default function Carousel({
   if (items.length === 0) {
     return (
       <div
-        className={`relative overflow-hidden p-4 flex items-center justify-center ${
-          round ? "rounded-full border border-white" : "rounded-[24px] border border-[#222]"
-        }`}
+        className={`relative overflow-hidden p-4 flex items-center justify-center ${round ? "rounded-full border border-white" : "rounded-[24px] border border-[#222]"
+          }`}
         style={{
           width: `${baseWidth}px`,
           height: round ? `${baseWidth}px` : "200px",
@@ -245,9 +249,8 @@ export default function Carousel({
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden p-4 ${
-        round ? "rounded-full border border-white" : "rounded-[24px] border border-[#222]"
-      }`}
+      className={`relative overflow-hidden p-4 ${round ? "rounded-full border border-white" : "rounded-[24px] border border-[#222]"
+        }`}
       style={{
         width: `${baseWidth}px`,
         ...(round && { height: `${baseWidth}px` }),
@@ -283,23 +286,21 @@ export default function Carousel({
         ))}
       </motion.div>
       <div
-        className={`flex w-full justify-center ${
-          round ? "absolute z-20 bottom-12 left-1/2 -translate-x-1/2" : ""
-        }`}
+        className={`flex w-full justify-center ${round ? "absolute z-20 bottom-12 left-1/2 -translate-x-1/2" : ""
+          }`}
       >
         <div className="mt-4 flex w-[150px] justify-between px-8">
           {items.map((_, index) => (
             <motion.div
               key={index}
-              className={`h-2 w-2 rounded-full cursor-pointer transition-colors duration-150 ${
-                currentIndex % items.length === index
+              className={`h-2 w-2 rounded-full cursor-pointer transition-colors duration-150 ${currentIndex % items.length === index
                   ? round
                     ? "bg-white"
                     : "bg-[#333333]"
                   : round
                     ? "bg-[#555]"
                     : "bg-[rgba(51,51,51,0.4)]"
-              }`}
+                }`}
               animate={{
                 scale: currentIndex % items.length === index ? 1.2 : 1,
               }}

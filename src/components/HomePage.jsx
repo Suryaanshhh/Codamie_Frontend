@@ -70,49 +70,70 @@ const matchRequests = [
 ];
 
 export const Homepage = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-    const token = searchParams.get("token");
-  const token2=localStorage.getItem("Token")
-  console.log(token2)
-  if(token){
-    localStorage.setItem("Token", token);
-  }
-  else{
-    localStorage.setItem("Token", token2);
-  }
-
-
-
-const [requests, setRequests] = useState([]);
-
-useEffect(() => {
-  axios
-    .get('http://localhost:3000/showMatchRequests', {
-      headers: { Authorization: token }
-    })
+  const [requests, setRequests] = useState([]);
+  
+  // Get token from multiple sources
+  const urlToken = searchParams.get("token");
+  const storedToken = localStorage.getItem("Token");
+  console.log(storedToken)
+  // Set token with priority to URL parameter
+  useEffect(() => {
+    if (urlToken) {
+      console.log("Setting token from URL:", urlToken);
+      localStorage.setItem("Token", urlToken);
+    }
+    else {
+      localStorage.setItem("Token",storedToken)
+    }
     
-    .then(res => {
-      console.log('Fetched Data:', res.data);
-
-      // Extract the array from the object
-      const users = res.data.allMatches || [];
-
-      // Format each item for your component
-      const formatted = users.map(user => ({
-        ...user,
-        title: user.Name,
-        description: user.Biodata || 'Wants to connect with you',
-        icon: user.Avatar || '👤',
-        requestTime: '2h ago' // replace with logic using user.createdAt if needed
-      }));
-
-      setRequests(formatted);
-    })
-    .catch(err => {
-      console.error('❌ Error fetching match requests:', err);
-    });
-}, []);
-
+    //Once we have a token, fetch data
+    fetchMatchRequests();
+  }, [urlToken, storedToken]);
+  
+  // Separate function for fetching match requests
+  const fetchMatchRequests = () => {
+    const currentToken = localStorage.getItem("Token");
+    localStorage.setItem("Token",currentToken)
+    if (!currentToken) {
+      console.error("No token available for API request");
+      return;
+    }
+    
+    console.log("Using token for API request:", currentToken);
+    
+    axios
+      .get('http://localhost:3000/showMatchRequests', {
+        headers: { Authorization:  currentToken } // Add Bearer prefix
+      })
+      .then(res => {
+        console.log('Fetched Data:', res.data);
+        
+        // Extract the array from the object
+        const users = res.data.allMatches || [];
+        
+        // Format each item for your component
+        const formatted = users.map(user => ({
+          ...user,
+          title: user.Name,
+          description: user.Biodata || 'Wants to connect with you',
+          icon: user.Avatar || '👤',
+          requestTime: '2h ago' // replace with logic using user.createdAt if needed
+        }));
+        
+        setRequests(formatted);
+      })
+      .catch(err => {
+        console.error('❌ Error fetching match requests:', err);
+        // Handle specific error cases
+        if (err.response && err.response.status === 401) {
+          alert("Session expired. Please log in again.");
+          localStorage.removeItem("Token"); // Clear invalid token
+          navigate("/login");
+        }
+      });
+  };
 
   return (
     <div className="min-h-screen bg-rose-50">
