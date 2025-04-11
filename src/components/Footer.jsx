@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import { useNavigate } from 'react-router-dom';
 
 export default function Footer(){
+
+  const navigate=useNavigate()
     return (
          
       <footer className="bg-gray-900 text-white py-12">
@@ -17,16 +19,16 @@ export default function Footer(){
               <div>
                 <h3 className="text-sm font-semibold mb-3 text-gray-300">Company</h3>
                 <ul className="space-y-2 text-sm">
-                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Features</a></li>
+                  <li><a href="/about" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
+                  <li><a href="/features" className="text-gray-400 hover:text-white transition-colors">Features</a></li>
                 </ul>
               </div>
               
               <div>
                 <h3 className="text-sm font-semibold mb-3 text-gray-300">Help</h3>
                 <ul className="space-y-2 text-sm">
-                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">FAQ</a></li>
-                  <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contact Us</a></li>
+                  <li><a href="/faq" className="text-gray-400 hover:text-white transition-colors">FAQ</a></li>
+                  <li><a href="/contact" className="text-gray-400 hover:text-white transition-colors">Contact Us</a></li>
                   
                 </ul>
               </div>

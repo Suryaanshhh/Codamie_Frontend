@@ -13,7 +13,7 @@ export default function Header(){
           <div className="hidden md:flex space-x-8">
             <a href="#" className="font-medium text-gray-600 hover:text-indigo-600 transition-colors">How It Works</a>
             <a href="#" className="font-medium text-gray-600 hover:text-indigo-600 transition-colors">Success Stories</a>
-            <a href="#" className="font-medium text-gray-600 hover:text-indigo-600 transition-colors">Blog</a>
+            <a href="/blogs" className="font-medium text-gray-600 hover:text-indigo-600 transition-colors">Blog</a>
           </div>
           
           <div className="flex space-x-4">
