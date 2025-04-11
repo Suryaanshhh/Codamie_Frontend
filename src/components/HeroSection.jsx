@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from 'react';
 
 export default function HeroSection(){
      const codeSnippets = [
@@ -103,24 +102,15 @@ export default function HeroSection(){
         }
       ];
     
-      // Set up animation for code cards - CHANGED: only 2 cards instead of 3
-      const [activeCardIndices, setActiveCardIndices] = useState([0, 1]);
-    
-      useEffect(() => {
-        const interval = setInterval(() => {
-          setActiveCardIndices(prev => {
-            const newIndices = [...prev];
-            // Rotate cards - remove first and add a new one at the end
-            newIndices.shift();
-            const lastIndex = prev[prev.length - 1];
-            const nextIndex = (lastIndex + 1) % codeSnippets.length;
-            newIndices.push(nextIndex);
-            return newIndices;
-          });
-        }, 5000); // Change cards every 5 seconds
-    
-        return () => clearInterval(interval);
-      }, []);
+      // Select two specific code snippets to display (first and second)
+      const displaySnippets = [codeSnippets[0], codeSnippets[1]];
+
+      // Code-themed love poem lines
+      const poemLines = [
+        "while(alive) { love.commit(); }",
+        "function love() { return forever; }",
+        "if(you && me) { us = true; }"
+      ];
     
       // Render a code snippet based on content array
       const renderCodeContent = (content) => {
@@ -168,6 +158,14 @@ export default function HeroSection(){
               <p className="text-lg text-gray-600 mb-8">
                 Codamie connects tech enthusiasts through shared passion for code. Express your love story in the language you both understand.
               </p>
+              
+              {/* Code Poetry */}
+              <div className="mb-8 bg-gray-50 p-4 rounded-lg border-l-4 border-indigo-400 font-mono text-sm">
+                {poemLines.map((line, index) => (
+                  <div key={index} className="mb-2 last:mb-0 text-gray-700">{line}</div>
+                ))}
+              </div>
+              
               <div className="flex gap-4 mb-8">
                 <button className="px-6 py-3 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors shadow-sm">
                   Start Coding Together
@@ -178,36 +176,47 @@ export default function HeroSection(){
               </div>
             </div>
             
-            {/* Code Gallery - CHANGED: layout for 2 cards */}
-            <div className="lg:w-1/2 flex justify-center">
+            {/* Code Gallery with Artwork */}
+            <div className="lg:w-1/2 flex flex-col items-center">
+              {/* Heart-shaped code artwork */}
+              <div className="mb-6 w-32 h-32 relative">
+                <svg viewBox="0 0 100 100" className="w-full h-full">
+                  <path 
+                    d="M50 90 C100 30 150 10 50 -30 C-50 10 0 30 50 90"
+                    fill="none"
+                    stroke="url(#heartGradient)"
+                    strokeWidth="2"
+                  />
+                  <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#4f46e5" />
+                    <stop offset="100%" stopColor="#06b6d4" />
+                  </linearGradient>
+                  <text x="50" y="45" fontFamily="monospace" fontSize="8" textAnchor="middle" fill="#4f46e5">
+                    {`{heart: true}`}
+                  </text>
+                </svg>
+              </div>
+              
+              {/* Code Cards */}
               <div className="flex justify-center gap-6">
-                <AnimatePresence mode="popLayout">
-                  {activeCardIndices.map(index => {
-                    const snippet = codeSnippets[index];
-                    return (
-                      <motion.div
-                        key={snippet.id}
-                        className="w-64 rounded-lg overflow-hidden shadow-lg bg-gray-900"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <div className="bg-gray-800 px-4 py-2 flex items-center">
-                          <div className="flex gap-2">
-                            <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                            <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                            <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                          </div>
-                          <div className="ml-4 text-gray-300 text-xs font-mono">{snippet.fileName}</div>
-                        </div>
-                        <div className="p-4 font-mono text-sm leading-relaxed">
-                          {renderCodeContent(snippet.content)}
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
+                {displaySnippets.map(snippet => (
+                  <div
+                    key={snippet.id}
+                    className="w-64 rounded-lg overflow-hidden shadow-lg bg-gray-900"
+                  >
+                    <div className="bg-gray-800 px-4 py-2 flex items-center">
+                      <div className="flex gap-2">
+                        <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                        <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                        <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                      </div>
+                      <div className="ml-4 text-gray-300 text-xs font-mono">{snippet.fileName}</div>
+                    </div>
+                    <div className="p-4 font-mono text-sm leading-relaxed">
+                      {renderCodeContent(snippet.content)}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

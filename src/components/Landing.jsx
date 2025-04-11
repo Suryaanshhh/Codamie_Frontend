@@ -4,6 +4,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Header from './Header';
 import HeroSection from './HeroSection';
 import Footer from './Footer';
+import { AboutUs } from './AboutUs';
+import { Contact } from './Contact';
 
 export default function Codamie() {
 
@@ -14,6 +16,8 @@ export default function Codamie() {
                 <Header />
                 <Routes>
                     <Route path='/' element={<HeroSection />} />
+                    <Route path='/about' element={<AboutUs />} />
+                    <Route path='/contact' element={<Contact/>} />
                 </Routes>
                 <Footer />
             </BrowserRouter>

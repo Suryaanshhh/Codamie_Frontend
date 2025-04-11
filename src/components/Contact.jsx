@@ -1,3 +1,7 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+
+
 export const Contact = () => {
     return (
       <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
