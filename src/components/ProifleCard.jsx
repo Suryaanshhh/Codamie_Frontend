@@ -182,11 +182,12 @@ export default function Carousel({
     };
 
   function addToMatch() {
+    const jwt=localStorage.getItem("Token")
     if (carouselItems.length > 0 && currentIndex < carouselItems.length) {
       console.log("Adding to match:", carouselItems[currentIndex]);
       axios.post("http://localhost:3000/createMatchRequest", carouselItems[currentIndex], {
         headers: {
-          Authorization: token
+          Authorization: jwt
         }
       }).then((response) => {
         alert("Match sent")

@@ -3,31 +3,41 @@ import ProfileCard from "./ProifleCard";
 import MatchesList from "./MatchesList";
 import MatchRequestList from "./MatchesRequest"
 import { useEffect, useState } from "react";
-import { useNavigate,useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
+
+const token = localStorage.getItem("Token")
 
 const handleAnimationComplete = () => {
   console.log('Animation completed!');
 };
 
-  // Handler for accepting a request
-  const handleAccept = (request) => {
-    console.log('Request accepted:', request);
-    // Add your logic for accepting a request
-    // For example: update database, show notification, etc.
-  };
+// Handler for accepting a request
+const handleAccept = (request) => {
+  const data = { name: request.Name, description: `A ${request.CodingLanguage} developer`, icon: request.Avatar }
+  axios.post("http://localhost:3000/addToMatch", data, {
+    headers: { Authorization: token }
+  }).then((res) => {
+    console.log(res.data)
+    alert("match successfull")
+  }).catch((err) => {
+    console.log(err)
+  })
+  // Add your logic for accepting a request
+  // For example: update database, show notification, etc.
+};
 
-  // Handler for rejecting a request
-  const handleReject = (request) => {
-    console.log('Request rejected:', request);
-    // Add your logic for rejecting a request
-  };
+// Handler for rejecting a request
+const handleReject = (request) => {
+  console.log('Request rejected:', request);
+  // Add your logic for rejecting a request
+};
 
-  // Optional: handler for when an item is selected
-  const handleItemSelect = (item, index) => {
-    console.log('Item selected:', item, 'at index:', index);
-    // For example: show more details about this person
-  };
+// Optional: handler for when an item is selected
+const handleItemSelect = (item, index) => {
+  console.log('Item selected:', item, 'at index:', index);
+  // For example: show more details about this person
+};
 
 
 // Sample items with the structure compatible with our styled MatchesList
@@ -44,36 +54,13 @@ const matchItems = [
   { title: 'Michael Brown', description: 'Mobile Developer', id: 10, icon: '📱' }
 ];
 
-const matchRequests = [
-  { 
-    title: 'Suryansh Dwivedi', 
-    description: 'Wants to connect with you', 
-    id: 1, 
-    icon: '🦹', 
-    requestTime: '2h ago' 
-  },
-  { 
-    title: 'Suryansh Dwivedi', 
-    description: 'Wants to connect with you', 
-    id: 1, 
-    icon: '🦹', 
-    requestTime: '2h ago' 
-  },
-  { 
-    title: 'Suryansh Dwivedi', 
-    description: 'Wants to connect with you', 
-    id: 1, 
-    icon: '🦹', 
-    requestTime: '2h ago' 
-  },
-  // Add more requests as needed
-];
+
 
 export const Homepage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [requests, setRequests] = useState([]);
-  
+
   // Get token from multiple sources
   const urlToken = searchParams.get("token");
   const storedToken = localStorage.getItem("Token");
@@ -85,34 +72,34 @@ export const Homepage = () => {
       localStorage.setItem("Token", urlToken);
     }
     else {
-      localStorage.setItem("Token",storedToken)
+      localStorage.setItem("Token", storedToken)
     }
-    
+
     //Once we have a token, fetch data
     fetchMatchRequests();
   }, [urlToken, storedToken]);
-  
+
   // Separate function for fetching match requests
   const fetchMatchRequests = () => {
     const currentToken = localStorage.getItem("Token");
-    localStorage.setItem("Token",currentToken)
+    localStorage.setItem("Token", currentToken)
     if (!currentToken) {
       console.error("No token available for API request");
       return;
     }
-    
+
     console.log("Using token for API request:", currentToken);
-    
+
     axios
       .get('http://localhost:3000/showMatchRequests', {
-        headers: { Authorization:  currentToken } // Add Bearer prefix
+        headers: { Authorization: currentToken } // Add Bearer prefix
       })
       .then(res => {
         console.log('Fetched Data:', res.data);
-        
+
         // Extract the array from the object
         const users = res.data.allMatches || [];
-        
+
         // Format each item for your component
         const formatted = users.map(user => ({
           ...user,
@@ -121,7 +108,7 @@ export const Homepage = () => {
           icon: user.Avatar || '👤',
           requestTime: '2h ago' // replace with logic using user.createdAt if needed
         }));
-        
+
         setRequests(formatted);
       })
       .catch(err => {
@@ -134,6 +121,11 @@ export const Homepage = () => {
         }
       });
   };
+
+
+  useEffect(() => {
+
+  })
 
   return (
     <div className="min-h-screen bg-rose-50">
@@ -155,7 +147,7 @@ export const Homepage = () => {
         <div className="flex flex-col items-center">
           <h2 className="text-xl font-semibold mb-6 text-center">Discover Profiles</h2>
           <div style={{ height: '600px', position: 'relative' }}>
-            <ProfileCard 
+            <ProfileCard
               baseWidth={350}
               autoplay={false}
               autoplayDelay={3000}
@@ -167,16 +159,16 @@ export const Homepage = () => {
         </div>
 
         <div className="flex flex-col items-center">
-        <h2 className="text-xl font-semibold mb-6 text-center">Your Matches</h2>
-        <div style={{ height: '600px', position: 'relative' }}>
-          <MatchRequestList 
-            requests={requests}
-            onRequestAccept={handleAccept}
-            onRequestReject={handleReject}
-            onItemSelect={handleItemSelect}
-            enableArrowNavigation={true}
-            showGradients={true}
-          />
+          <h2 className="text-xl font-semibold mb-6 text-center">Your Matches</h2>
+          <div style={{ height: '600px', position: 'relative' }}>
+            <MatchRequestList
+              requests={requests}
+              onRequestAccept={handleAccept}
+              onRequestReject={handleReject}
+              onItemSelect={handleItemSelect}
+              enableArrowNavigation={true}
+              showGradients={true}
+            />
           </div>
         </div>
 
