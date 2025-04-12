@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 
 export default function Header(){
+  const navigate=useNavigate()
     return(
         <header className="bg-white shadow-sm fixed w-full top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
@@ -17,8 +19,12 @@ export default function Header(){
           </div>
           
           <div className="flex space-x-4">
-            <button className="px-4 py-2 rounded-md border border-indigo-600 text-indigo-600 font-medium hover:bg-indigo-50 transition-colors">Log in</button>
-            <button className="px-4 py-2 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors">Sign up</button>
+            <button onClick={function(){
+              navigate("/login")
+            }} className="px-4 py-2 rounded-md border border-indigo-600 text-indigo-600 font-medium hover:bg-indigo-50 transition-colors">Log in</button>
+            <button onClick={function(){
+              navigate("/signup")
+            }} className="px-4 py-2 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors">Sign up</button>
           </div>
         </div>
       </header>
