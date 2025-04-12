@@ -1,6 +1,36 @@
-import React from 'react';
-
+import React, { useEffect, useState } from 'react';
+import axios from "axios";
 export default function Signup() {
+  const [fullName, setFullName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+
+  const Data = {
+    userName: fullName,
+    userEmail: email,
+    userPassword: password
+  }
+
+
+  function githubAuth() {
+    window.location.href = "http://localhost:3000/auth/github";
+  }
+
+  function submit() {
+    if (!Data.userName || !Data.userEmail || !Data.userPassword) {
+      alert("Fill all fields")
+    }
+    else {
+    
+        axios.post("http://localhost:3000/registerUser", Data).then((res) => {
+          console.log(res)
+          alert("user Registered")
+        }).then((err) => {
+          console.log(err)
+        })
+      
+    }
+  }
   return (
     <div className="bg-gradient-to-b from-white to-indigo-50 min-h-screen font-sans flex items-center justify-center ">
       <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md mt-10 mb-10">
@@ -13,77 +43,78 @@ export default function Signup() {
         </div>
 
         {/* Form */}
-        <form>
-          <div className="mb-6">
-            <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-                Your Name
-              </label>
-              <input
-                type="text"
-                id="firstName"
-                className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                placeholder="John"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
+        <div className="mb-6">
+          <div>
+            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+              Your Name
             </label>
-            <input
-              type="email"
-              id="email"
+            <input onChange={function (e) {
+              setFullName(e.target.value)
+            }}
+              type="text"
+              id="firstName"
               className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-              placeholder="you@example.com"
+              placeholder="John"
               required
             />
           </div>
+        </div>
 
-          
+        <div className="mb-6">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            Email
+          </label>
+          <input onChange={function (e) {
+            setEmail(e.target.value)
+          }}
+            type="email"
+            id="email"
+            className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            placeholder="you@example.com"
+            required
+          />
+        </div>
+        <div className="mb-6">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            Password
+          </label>
+          <input onChange={function (e) {
+            setPassword(e.target.value)
+          }}
+            type="password"
+            id="password"
+            className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            placeholder="••••••••"
+            required
+          />
+        </div>
+        <div className="mb-6 flex items-start">
+          <input
+            type="checkbox"
+            id="terms"
+            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded mt-1"
+            required
+          />
+          <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
+            I agree to the{" "}
+            <a href="#" className="text-indigo-600 hover:text-indigo-500 font-medium">
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a href="#" className="text-indigo-600 hover:text-indigo-500 font-medium">
+              Privacy Policy
+            </a>
+          </label>
+        </div>
+        <div className="mb-6">
+          <button onClick={submit}
+            type="submit"
+            className="w-full bg-indigo-600 text-white font-medium py-3 px-4 rounded-md hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          >
+            Create Account
+          </button>
+        </div>
 
-          <div className="mb-6">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-              placeholder="••••••••"
-              required
-            />
-          </div>
-          <div className="mb-6 flex items-start">
-            <input
-              type="checkbox"
-              id="terms"
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded mt-1"
-              required
-            />
-            <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-              I agree to the{" "}
-              <a href="#" className="text-indigo-600 hover:text-indigo-500 font-medium">
-                Terms of Service
-              </a>{" "}
-              and{" "}
-              <a href="#" className="text-indigo-600 hover:text-indigo-500 font-medium">
-                Privacy Policy
-              </a>
-            </label>
-          </div>
-
-          <div className="mb-6">
-            <button
-              type="submit"
-              className="w-full bg-indigo-600 text-white font-medium py-3 px-4 rounded-md hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            >
-              Create Account
-            </button>
-          </div>
-        </form>
 
         {/* Footer */}
         <div className="text-center text-gray-600">
@@ -104,7 +135,7 @@ export default function Signup() {
 
         {/* GitHub Signup Button */}
         <div className="flex justify-center">
-          <button className="flex items-center justify-center py-3 px-6 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors w-full">
+          <button onClick={githubAuth} className="flex items-center justify-center py-3 px-6 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors w-full">
             <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
               <path
                 fillRule="evenodd"

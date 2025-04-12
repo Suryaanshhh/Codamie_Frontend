@@ -1,6 +1,60 @@
-import React from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from "react-router-dom"
 
 export default function Login() {
+
+  const [searchParams] = useSearchParams();
+
+
+  const urlToken = searchParams.get("token");
+  if(urlToken){
+    localStorage.setItem("token", urlToken);
+  }
+  console.log(urlToken)
+
+
+
+
+
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+
+  const profileData = {
+    userEmail: email,
+    userPassword: password
+  }
+
+  function githubAuth() {
+    window.location.href = "http://localhost:3000/auth/github";
+  }
+
+
+  function loginUser() {
+    if (!profileData.userEmail || !profileData.userPassword) {
+      alert("Fill all fields")
+    }
+    else {
+
+      axios.post("http://localhost:3000/loginUser", profileData).then((res) => {
+        const jwtToken = res.data.jsonWebToken;
+        console.log(jwtToken)
+        if (jwtToken) {
+          localStorage.setItem("token", jwtToken);
+        }
+        else {
+          localStorage.setItem("token", urlToken);
+        }
+        console.log(res)
+        alert("user logged in")
+      }).catch((err) => {
+        console.log(err)
+        alert("something went wrong")
+      })
+
+    }
+  }
+
   return (
     <div className="bg-gradient-to-b from-white to-indigo-50 min-h-screen font-sans flex items-center justify-center ">
       <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
@@ -13,47 +67,51 @@ export default function Login() {
         </div>
 
         {/* Form */}
-        <form>
-          <div className="mb-6">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
+
+        <div className="mb-6">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            Email
+          </label>
+          <input onChange={function (e) {
+            setEmail(e.target.value)
+          }}
+            type="email"
+            id="email"
+            className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            placeholder="you@example.com"
+            required
+          />
+        </div>
+
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              Password
             </label>
-            <input
-              type="email"
-              id="email"
-              className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-              placeholder="you@example.com"
-              required
-            />
+            <a href="#" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+              Forgot password?
+            </a>
           </div>
+          <input onChange={function (e) {
+            setPassword(e.target.value)
+          }}
+            type="password"
+            id="password"
+            className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            placeholder="••••••••"
+            required
+          />
+        </div>
 
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-1">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <a href="#" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
-                Forgot password?
-              </a>
-            </div>
-            <input
-              type="password"
-              id="password"
-              className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-              placeholder="••••••••"
-              required
-            />
-          </div>
+        <div className="mb-6">
+          <button onClick={loginUser}
+            type="submit"
+            className="w-full bg-indigo-600 text-white font-medium py-3 px-4 rounded-md hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          >
+            Sign in
+          </button>
+        </div>
 
-          <div className="mb-6">
-            <button
-              type="submit"
-              className="w-full bg-indigo-600 text-white font-medium py-3 px-4 rounded-md hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-            >
-              Sign in
-            </button>
-          </div>
-        </form>
 
         {/* Footer */}
         <div className="text-center text-gray-600">
@@ -74,7 +132,7 @@ export default function Login() {
 
         {/* GitHub Login Button */}
         <div className="flex justify-center">
-          <button className="flex items-center justify-center py-3 px-6 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors w-full">
+          <button onClick={githubAuth} className="flex items-center justify-center py-3 px-6 rounded-md border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors w-full">
             <svg className="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 24 24">
               <path
                 fillRule="evenodd"
