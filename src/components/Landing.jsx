@@ -11,12 +11,13 @@ import { FAQ } from './Faq';
 import Blog from './Blog';
 import Signup from './Signup';
 import Login from './Login';
+import UserProfile from './UserProfile';
 
 export default function Codamie() {
 
 
     return (
-        <div className="bg-white text-gray-800 min-h-screen font-sans">
+        <div className="bg-white text-gray-800 min-h-screen font-sans ">
             <BrowserRouter>
                 <Header />
            <div className='mt-15'>
@@ -29,6 +30,7 @@ export default function Codamie() {
                     <Route path='/blogs' element={<Blog/>}/>
                     <Route path='/signup' element={<Signup/>}/>
                     <Route path='/login' element={<Login/>}/>
+                    <Route path='/createProfile' element={<UserProfile/>} />
                  </Routes>
            </div>
                 <Footer />

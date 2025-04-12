@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from "react-router-dom"
 
 export default function Login() {
-
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams();
 
 
@@ -47,6 +47,7 @@ export default function Login() {
         }
         console.log(res)
         alert("user logged in")
+        navigate("/createProfile")
       }).catch((err) => {
         console.log(err)
         alert("something went wrong")
