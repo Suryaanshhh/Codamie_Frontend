@@ -7,13 +7,15 @@ export default function UserProfile() {
   const [engineeringForte, setEngineeringForte] = useState('Full Stack Developer');
   const [about, setAbout] = useState('');
   const [charCount, setCharCount] = useState(0);
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState('');
   const maxCharCount = 150;
 
   // Avatar options with cool emojis
   const avatarOptions = [
     { emoji: '👩‍💻', label: 'Woman Technologist' },
     { emoji: '👨‍💻', label: 'Man Technologist' },
-    { emoji: '🧑‍💻', label: 'Person Technologist' },
+    { emoji: '🧑', label: 'Person Technologist' },
     { emoji: '👸', label: 'Princess' },
     { emoji: '🦸‍♀️', label: 'Superwoman' },
     { emoji: '🦸‍♂️', label: 'Superman' },
@@ -43,6 +45,15 @@ export default function UserProfile() {
     'Mobile Developer'
   ];
 
+  // Gender options
+  const genderOptions = [
+    'Female',
+    'Male',
+    'Non-binary',
+    'Other',
+    'Prefer not to say'
+  ];
+
   // Update character count when about text changes
   useEffect(() => {
     setCharCount(about.length);
@@ -58,6 +69,14 @@ export default function UserProfile() {
     const text = e.target.value;
     if (text.length <= maxCharCount) {
       setAbout(text);
+    }
+  };
+
+  // Handle age input
+  const handleAgeChange = (e) => {
+    const value = e.target.value;
+    if (value === '' || (parseInt(value) >= 18 && parseInt(value) <= 100)) {
+      setAge(value);
     }
   };
 
@@ -109,6 +128,7 @@ export default function UserProfile() {
                   <div>
                     <div className="text-sm text-gray-600 font-medium">{engineeringForte}</div>
                     <div className="text-sm text-indigo-600">{codingLanguage}</div>
+                    <div className="text-sm text-gray-500">{age && `${age} years`} • {gender}</div>
                   </div>
                 </div>
                 {about && (
@@ -122,6 +142,53 @@ export default function UserProfile() {
             {/* Right Column - Form Fields */}
             <div className="md:col-span-3">
               <div className="space-y-4 mb-6">
+                {/* Age and Gender Row */}
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Age Input */}
+                  <div>
+                    <label htmlFor="age" className="block text-gray-700 text-sm font-medium mb-2">
+                      Age
+                    </label>
+                    <input
+                      type="number"
+                      id="age"
+                      value={age}
+                      onChange={handleAgeChange}
+                      min="18"
+                      max="100"
+                      placeholder="Enter age"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 py-2 px-3 text-gray-700 bg-white border border-gray-300"
+                    />
+                  </div>
+
+                  {/* Gender Selection */}
+                  <div>
+                    <label htmlFor="gender" className="block text-gray-700 text-sm font-medium mb-2">
+                      Gender
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="gender"
+                        value={gender}
+                        onChange={(e) => setGender(e.target.value)}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 py-2 pl-3 pr-10 text-gray-700 appearance-none bg-white border border-gray-300"
+                      >
+                        <option value="">Select gender</option>
+                        {genderOptions.map((option, index) => (
+                          <option key={index} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Coding Language Selection */}
                 <div>
                   <label htmlFor="codingLanguage" className="block text-gray-700 text-sm font-medium mb-2">
@@ -173,6 +240,21 @@ export default function UserProfile() {
                     </div>
                   </div>
                 </div>
+
+
+                <div>
+                  <label htmlFor="engineeringForte" className="block text-gray-700 text-sm font-medium mb-2">
+                    Engineering Forte
+                  </label>
+                  <div className="relative">
+                   
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                      <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
                 
                 {/* About Section */}
                 <div>
@@ -203,6 +285,7 @@ export default function UserProfile() {
                   <div>
                     <div className="text-sm text-gray-600 font-medium">{engineeringForte}</div>
                     <div className="text-sm text-indigo-600">{codingLanguage}</div>
+                    <div className="text-sm text-gray-500">{age && `${age} years`} • {gender}</div>
                   </div>
                   {about && (
                     <div className="text-sm text-gray-600 border-l border-gray-200 pl-4">
