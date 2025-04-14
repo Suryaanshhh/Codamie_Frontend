@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { User, Heart, UserPlus, MessageSquareMore, Code, Github, X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
-
+import axios from 'axios';
 // Sample profiles data
 const profiles = [
   {
@@ -45,18 +46,53 @@ const profiles = [
   }
 ];
 
+
+
+
 const UserProfile = () => {
+
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const urlToken = searchParams.get("token");
+  if (urlToken) {
+    localStorage.setItem("token", urlToken);
+  }
+  console.log(urlToken)
+
+  const[userProfiles, setUserProfiles] = useState();
+
+
+useEffect(()=>{
+  
+  axios.get("http://localhost:3000/showprofiles",{
+    headers:{
+      Authorization:localStorage.getItem("token")
+    }
+  })
+  .then((response)=>{
+    console.log(response.data)
+    setUserProfiles(response.data.profile)
+  })
+  .catch((error)=>{
+    console.log(error)
+  })
+},setUserProfiles)
+
+console.log(userProfiles)
+
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
   const [swipedProfiles, setSwipedProfiles] = useState(new Set());
   
-  const currentProfile = profiles[currentProfileIndex];
-  
+  const currentProfile = userProfiles[0];
+  console.log(currentProfileIndex)
+  console.log(currentProfile)  
   const handleSwipe = (direction) => {
     // Add current profile to swiped set
     setSwipedProfiles(prev => new Set([...prev, currentProfile.id]));
     
     // Move to next profile if available
-    if (currentProfileIndex < profiles.length - 1) {
+    if (currentProfileIndex < userProfiles.length - 1) {
       setCurrentProfileIndex(prev => prev + 1);
     }
     
@@ -66,7 +102,7 @@ const UserProfile = () => {
   const handleNavigate = (direction) => {
     if (direction === 'prev' && currentProfileIndex > 0) {
       setCurrentProfileIndex(prev => prev - 1);
-    } else if (direction === 'next' && currentProfileIndex < profiles.length - 1) {
+    } else if (direction === 'next' && currentProfileIndex < userProfiles.length - 1) {
       setCurrentProfileIndex(prev => prev + 1);
     }
   };
@@ -86,30 +122,33 @@ const UserProfile = () => {
       <div className="absolute top-1/2 -right-4 transform -translate-y-1/2">
         <button 
           onClick={() => handleNavigate('next')}
-          disabled={currentProfileIndex === profiles.length - 1}
-          className={`p-2 rounded-full ${currentProfileIndex === profiles.length - 1 ? 'text-gray-300' : 'text-gray-600 hover:bg-gray-100'}`}
+          disabled={currentProfileIndex === userProfiles.length - 1}
+          className={`p-2 rounded-full ${currentProfileIndex === userProfiles.length - 1 ? 'text-gray-300' : 'text-gray-600 hover:bg-gray-100'}`}
         >
           <ChevronRight size={24} />
         </button>
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center space-y-6 bg-white rounded-lg p-6">
-        <div className="text-8xl animate-bounce">{currentProfile.emoji}</div>
+        <div className="text-8xl animate-bounce">{currentProfile.Avatar}</div>
         
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-800">
-            {currentProfile.name}, {currentProfile.age}
+            {currentProfile.Name}, {currentProfile.Age}
           </h2>
-          <p className="text-blue-600 font-medium">{currentProfile.role}</p>
+          <p className="text-blue-600 font-medium">{currentProfile.devType
+          }</p>
           <div className="flex items-center justify-center space-x-2 mt-2">
             <Code size={16} className="text-gray-600" />
-            <span className="text-gray-600">{currentProfile.skills.join(', ')}</span>
+            <span className="text-gray-600">{currentProfile.CodingLanguage
+            }</span>
           </div>
         </div>
         
         <div className="space-y-4">
-          <p className="text-gray-700 text-center">{currentProfile.bio}</p>
-          <div className="flex justify-center space-x-4">
+          <p className="text-gray-700 text-center">{currentProfile.Biodata
+          }</p>
+          {/* <div className="flex justify-center space-x-4">
             <a 
               href={currentProfile.github} 
               target="_blank" 
@@ -119,11 +158,11 @@ const UserProfile = () => {
               <Github size={20} />
               <span>GitHub</span>
             </a>
-          </div>
+          </div> */}
         </div>
 
         <div className="text-sm text-gray-500">
-          Profile {currentProfileIndex + 1} of {profiles.length}
+          Profile {currentProfileIndex + 1} of {userProfiles.length}
         </div>
       </div>
 

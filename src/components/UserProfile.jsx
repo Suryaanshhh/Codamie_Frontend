@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom"
 import axios from 'axios';
 
 export default function UserProfile() {
-
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const urlToken = searchParams.get("token");
@@ -109,6 +109,7 @@ export default function UserProfile() {
       }
     }).then((res) => {
       console.log(res.data)
+      navigate("/home")
     }).catch((err) => {
       console.log(err)
     })
