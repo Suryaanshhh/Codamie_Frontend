@@ -50,44 +50,53 @@ const profiles = [
 
 
 const UserProfile = () => {
-
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-
-  const urlToken = searchParams.get("token");
-  if (urlToken) {
-    localStorage.setItem("token", urlToken);
-  }
-  console.log(urlToken)
-
-  const[userProfiles, setUserProfiles] = useState();
-
-
-useEffect(()=>{
-  
-  axios.get("http://localhost:3000/showprofiles",{
-    headers:{
-      Authorization:localStorage.getItem("token")
-    }
-  })
-  .then((response)=>{
-    console.log(response.data)
-    setUserProfiles(response.data.profile)
-  })
-  .catch((error)=>{
-    console.log(error)
-  })
-},setUserProfiles)
-
-console.log(userProfiles)
-
+  const [userProfiles, setUserProfiles] = useState([]);
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
   const [swipedProfiles, setSwipedProfiles] = useState(new Set());
-  
-  const currentProfile = userProfiles[0];
-  console.log(currentProfileIndex)
-  console.log(currentProfile)  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Handle URL token if present
+  useEffect(() => {
+    const urlToken = searchParams.get("token");
+    if (urlToken) {
+      localStorage.setItem("token", urlToken);
+    }
+  }, [searchParams]);
+
+  // Fetch profiles
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    
+    axios.get("http://localhost:3000/showprofiles", {
+      headers: {
+        Authorization: localStorage.getItem("token")
+      }
+    })
+    .then((response) => {
+      if (response.data && response.data.profile) {
+        setUserProfiles(response.data.profile);
+      } else {
+        setUserProfiles([]);
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching profiles:", error);
+      setError(error);
+    })
+    .finally(() => {
+      setLoading(false);
+    });
+  }, []); // Empty dependency array means this runs once on component mount
+
+  const currentProfile = userProfiles.length > 0 ? userProfiles[currentProfileIndex] : null;
+
   const handleSwipe = (direction) => {
+    if (!currentProfile) return;
+    
     // Add current profile to swiped set
     setSwipedProfiles(prev => new Set([...prev, currentProfile.id]));
     
@@ -96,7 +105,7 @@ console.log(userProfiles)
       setCurrentProfileIndex(prev => prev + 1);
     }
     
-    console.log(`Swiped ${direction} on ${currentProfile.name}`);
+    console.log(`Swiped ${direction} on ${currentProfile.Name}`);
   };
 
   const handleNavigate = (direction) => {
@@ -106,6 +115,33 @@ console.log(userProfiles)
       setCurrentProfileIndex(prev => prev + 1);
     }
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="h-[500px] flex items-center justify-center">
+        <div className="text-xl text-gray-600">Loading profiles...</div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="h-[500px] flex items-center justify-center">
+        <div className="text-xl text-red-600">Failed to load profiles. Please try again later.</div>
+      </div>
+    );
+  }
+
+  // No profiles available
+  if (userProfiles.length === 0) {
+    return (
+      <div className="h-[500px] flex items-center justify-center">
+        <div className="text-xl text-gray-600">No profiles available</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 h-[500px] flex flex-col relative">
@@ -136,29 +172,15 @@ console.log(userProfiles)
           <h2 className="text-2xl font-bold text-gray-800">
             {currentProfile.Name}, {currentProfile.Age}
           </h2>
-          <p className="text-blue-600 font-medium">{currentProfile.devType
-          }</p>
+          <p className="text-blue-600 font-medium">{currentProfile.devType}</p>
           <div className="flex items-center justify-center space-x-2 mt-2">
             <Code size={16} className="text-gray-600" />
-            <span className="text-gray-600">{currentProfile.CodingLanguage
-            }</span>
+            <span className="text-gray-600">{currentProfile.CodingLanguage}</span>
           </div>
         </div>
         
         <div className="space-y-4">
-          <p className="text-gray-700 text-center">{currentProfile.Biodata
-          }</p>
-          {/* <div className="flex justify-center space-x-4">
-            <a 
-              href={currentProfile.github} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="flex items-center space-x-2 text-gray-600 hover:text-blue-600"
-            >
-              <Github size={20} />
-              <span>GitHub</span>
-            </a>
-          </div> */}
+          <p className="text-gray-700 text-center">{currentProfile.Biodata}</p>
         </div>
 
         <div className="text-sm text-gray-500">
@@ -183,7 +205,6 @@ console.log(userProfiles)
     </div>
   );
 };
-
 const UserMatches = () => (
   <div className="h-[500px] overflow-y-auto">
     <h2 className="text-2xl font-bold mb-4 text-gray-800">Your Perfect Matches</h2>
