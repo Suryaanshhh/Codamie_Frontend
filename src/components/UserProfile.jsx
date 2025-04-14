@@ -1,7 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from "react-router-dom"
+import axios from 'axios';
 
 export default function UserProfile() {
-  // State for form fields
+
+  const [searchParams] = useSearchParams();
+
+  const urlToken = searchParams.get("token");
+  if (urlToken) {
+    localStorage.setItem("token", urlToken);
+  }
+  console.log(urlToken)
+
+
   const [avatar, setAvatar] = useState('👩‍💻');
   const [codingLanguage, setCodingLanguage] = useState('JavaScript');
   const [engineeringForte, setEngineeringForte] = useState('Full Stack Developer');
@@ -80,13 +91,37 @@ export default function UserProfile() {
     }
   };
 
+
+  function createProfile() {
+    const data = {
+      Avatar: avatar,
+      Age: age,
+      CodingLanguage: codingLanguage,
+      Forte: engineeringForte,
+      Biodata: about,
+      Gender: gender
+    }
+
+
+    axios.post("http://localhost:3000/createUserProfile", data, {
+      headers: {
+        Authorization: localStorage.getItem("token")
+      }
+    }).then((res) => {
+      console.log(res.data)
+    }).catch((err) => {
+      console.log(err)
+    })
+
+  }
+
   return (
     <section className="py-16 bg-indigo-50 px-4">
       <div className="container mx-auto">
         <h2 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
           Create Your Coding Profile
         </h2>
-        
+
         <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 max-w-2xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
             {/* Left Column - Avatar */}
@@ -100,11 +135,10 @@ export default function UserProfile() {
                     <button
                       key={index}
                       onClick={() => handleAvatarChange(option.emoji)}
-                      className={`text-2xl p-1 rounded-lg transition-all ${
-                        avatar === option.emoji
-                          ? 'bg-indigo-100 border-2 border-indigo-500 scale-105'
-                          : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'
-                      }`}
+                      className={`text-2xl p-1 rounded-lg transition-all ${avatar === option.emoji
+                        ? 'bg-indigo-100 border-2 border-indigo-500 scale-105'
+                        : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'
+                        }`}
                       title={option.label}
                     >
                       {option.emoji}
@@ -112,14 +146,14 @@ export default function UserProfile() {
                   ))}
                 </div>
               </div>
-              
+
               {/* Selected Avatar Display */}
               <div className="flex justify-center mb-6">
                 <div className="bg-indigo-50 rounded-full w-24 h-24 flex items-center justify-center">
                   <span className="text-5xl">{avatar}</span>
                 </div>
               </div>
-              
+
               {/* Profile Summary - Mobile only */}
               <div className="bg-gradient-to-r from-indigo-50 to-cyan-50 p-4 rounded-lg md:hidden">
                 <h3 className="text-md font-medium text-gray-800 mb-2">Your Profile</h3>
@@ -138,7 +172,7 @@ export default function UserProfile() {
                 )}
               </div>
             </div>
-            
+
             {/* Right Column - Form Fields */}
             <div className="md:col-span-3">
               <div className="space-y-4 mb-6">
@@ -214,7 +248,7 @@ export default function UserProfile() {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Engineering Forte Selection */}
                 <div>
                   <label htmlFor="engineeringForte" className="block text-gray-700 text-sm font-medium mb-2">
@@ -247,7 +281,7 @@ export default function UserProfile() {
                     Engineering Forte
                   </label>
                   <div className="relative">
-                   
+
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                       <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -255,7 +289,7 @@ export default function UserProfile() {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* About Section */}
                 <div>
                   <label htmlFor="about" className="block text-gray-700 text-sm font-medium mb-2">
@@ -276,7 +310,7 @@ export default function UserProfile() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Profile Summary - Desktop only */}
               <div className="bg-gradient-to-r from-indigo-50 to-cyan-50 p-4 rounded-lg hidden md:block">
                 <h3 className="text-md font-medium text-gray-800 mb-2">Your Profile</h3>
@@ -296,9 +330,9 @@ export default function UserProfile() {
               </div>
             </div>
           </div>
-          
+
           {/* Save Button */}
-          <button className="mt-6 w-full py-3 px-4 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors shadow-sm">
+          <button onClick={createProfile} className="mt-6 w-full py-3 px-4 rounded-md bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors shadow-sm">
             Save Profile
           </button>
         </div>
