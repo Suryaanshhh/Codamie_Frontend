@@ -70,42 +70,53 @@ const UserProfile = () => {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    
+
     axios.get("http://localhost:3000/showprofiles", {
       headers: {
         Authorization: localStorage.getItem("token")
       }
     })
-    .then((response) => {
-      if (response.data && response.data.profile) {
-        setUserProfiles(response.data.profile);
-      } else {
-        setUserProfiles([]);
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching profiles:", error);
-      setError(error);
-    })
-    .finally(() => {
-      setLoading(false);
-    });
+      .then((response) => {
+        if (response.data && response.data.profile) {
+          setUserProfiles(response.data.profile);
+        } else {
+          setUserProfiles([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching profiles:", error);
+        setError(error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []); // Empty dependency array means this runs once on component mount
 
   const currentProfile = userProfiles.length > 0 ? userProfiles[currentProfileIndex] : null;
 
   const handleSwipe = (direction) => {
     if (!currentProfile) return;
-    
+
     // Add current profile to swiped set
     setSwipedProfiles(prev => new Set([...prev, currentProfile.id]));
-    
+
     // Move to next profile if available
     if (currentProfileIndex < userProfiles.length - 1) {
       setCurrentProfileIndex(prev => prev + 1);
     }
-    
-    console.log(`Swiped ${direction} on ${currentProfile.Name}`);
+
+    if (direction == "right") {
+      const Personid = { id: currentProfile.UserId }
+      axios.post("http://localhost:3000/createMatchRequest", Personid, {
+        headers: {
+          Authorization: localStorage.getItem("token")
+        }
+      }).then((response) => {
+        console.log(response.data)
+      }).catch((error) => {
+        console.error("Error creating match request:", error);
+      })
+    }
   };
 
   const handleNavigate = (direction) => {
@@ -146,7 +157,7 @@ const UserProfile = () => {
   return (
     <div className="space-y-4 h-[500px] flex flex-col relative">
       <div className="absolute top-1/2 -left-4 transform -translate-y-1/2">
-        <button 
+        <button
           onClick={() => handleNavigate('prev')}
           disabled={currentProfileIndex === 0}
           className={`p-2 rounded-full ${currentProfileIndex === 0 ? 'text-gray-300' : 'text-gray-600 hover:bg-gray-100'}`}
@@ -154,9 +165,9 @@ const UserProfile = () => {
           <ChevronLeft size={24} />
         </button>
       </div>
-      
+
       <div className="absolute top-1/2 -right-4 transform -translate-y-1/2">
-        <button 
+        <button
           onClick={() => handleNavigate('next')}
           disabled={currentProfileIndex === userProfiles.length - 1}
           className={`p-2 rounded-full ${currentProfileIndex === userProfiles.length - 1 ? 'text-gray-300' : 'text-gray-600 hover:bg-gray-100'}`}
@@ -167,7 +178,7 @@ const UserProfile = () => {
 
       <div className="flex-1 flex flex-col items-center justify-center space-y-6 bg-white rounded-lg p-6">
         <div className="text-8xl animate-bounce">{currentProfile.Avatar}</div>
-        
+
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-800">
             {currentProfile.Name}, {currentProfile.Age}
@@ -178,7 +189,7 @@ const UserProfile = () => {
             <span className="text-gray-600">{currentProfile.CodingLanguage}</span>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <p className="text-gray-700 text-center">{currentProfile.Biodata}</p>
         </div>
@@ -189,13 +200,13 @@ const UserProfile = () => {
       </div>
 
       <div className="flex justify-center space-x-4 p-4">
-        <button 
+        <button
           className="p-4 bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-colors duration-200 shadow-lg hover:shadow-xl"
           onClick={() => handleSwipe('left')}
         >
           <X size={24} />
         </button>
-        <button 
+        <button
           className="p-4 bg-green-100 text-green-600 rounded-full hover:bg-green-200 transition-colors duration-200 shadow-lg hover:shadow-xl"
           onClick={() => handleSwipe('right')}
         >
@@ -205,6 +216,10 @@ const UserProfile = () => {
     </div>
   );
 };
+
+
+
+
 const UserMatches = () => (
   <div className="h-[500px] overflow-y-auto">
     <h2 className="text-2xl font-bold mb-4 text-gray-800">Your Perfect Matches</h2>
@@ -229,20 +244,36 @@ const UserMatches = () => (
   </div>
 );
 
-const MatchRequests = () => (
-  <div className="h-[500px] overflow-y-auto">
+
+
+
+const MatchRequests = () => {
+  const[requests, setRequests] = useState([]);
+
+  useEffect(()=>{
+    axios.get("http://localhost:3000/showMatchRequests", {
+      headers:{
+        Authorization: localStorage.getItem("token")
+      }
+    }).then((response)=>{
+      console.log(response.data.allMatches)
+      setRequests(response.data.allMatches)
+    }).catch((error)=>{
+      console.error("Error fetching requests:", error);
+    })
+  },[])
+  
+
+
+  return <div className="h-[500px] overflow-y-auto">
     <h2 className="text-2xl font-bold mb-4 text-gray-800">Connection Requests</h2>
     <div className="space-y-4">
-      {[
-        { emoji: '👨‍💻', name: 'Michael', age: 29, role: 'DevOps Engineer', mutual: 3 },
-        { emoji: '👩‍💻', name: 'Lisa', age: 27, role: 'Software Architect', mutual: 4 }
-      ].map((request, index) => (
+      {requests.map((request, index) => (
         <div key={index} className="bg-white rounded-lg p-4 flex items-center space-x-4">
-          <div className="text-4xl">{request.emoji}</div>
+          <div className="text-4xl">{request.Avatar}</div>
           <div className="flex-1">
-            <h3 className="font-medium text-gray-800">{request.name}, {request.age}</h3>
-            <p className="text-sm text-blue-600">{request.role}</p>
-            <p className="text-sm text-gray-600">{request.mutual} mutual connections</p>
+            <h3 className="font-medium text-gray-800">{request.Name}, {request.Age}</h3>
+            <p className="text-sm text-blue-600">{request.devType}</p>
           </div>
           <div className="flex space-x-2">
             <button className="p-2 text-green-600 hover:bg-green-50 rounded-full transition-colors">
@@ -256,7 +287,7 @@ const MatchRequests = () => (
       ))}
     </div>
   </div>
-);
+};
 
 const AiChatBot = () => (
   <div className="h-[500px] flex flex-col">
