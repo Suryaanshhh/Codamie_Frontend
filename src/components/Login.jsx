@@ -1,6 +1,8 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from "react-router-dom"
+import { jwtDecode } from 'jwt-decode';
+
 
 export default function Login() {
   const navigate = useNavigate()
@@ -8,7 +10,7 @@ export default function Login() {
 
 
   const urlToken = searchParams.get("token");
-  if(urlToken){
+  if (urlToken) {
     localStorage.setItem("token", urlToken);
   }
   console.log(urlToken)
@@ -45,9 +47,13 @@ export default function Login() {
         else {
           localStorage.setItem("token", urlToken);
         }
-        console.log(res)
-        alert("user logged in")
-        navigate("/createProfile")
+        const decoded = jwtDecode(jwtToken);
+        if (decoded.profile == true) {
+          navigate("/home")
+        }
+        else {
+          navigate("/createProfile")
+        }
       }).catch((err) => {
         console.log(err)
         alert("something went wrong")
