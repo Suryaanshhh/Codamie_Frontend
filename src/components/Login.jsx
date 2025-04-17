@@ -28,7 +28,7 @@ export default function Login() {
   }
 
   function githubAuth() {
-    window.location.href = "http://codamiebackend-production.up.railway.app/auth/github";
+    window.location.href = "http://codamie-backend.onrender.com/auth/github";
   }
 
 
@@ -38,7 +38,7 @@ export default function Login() {
     }
     else {
 
-      axios.post("http://codamiebackend-production.up.railway.app/loginUser", profileData).then((res) => {
+      axios.post("http://codamie-backend.onrender.com/loginUser", profileData).then((res) => {
         const jwtToken = res.data.jsonWebToken;
         console.log(jwtToken)
         if (jwtToken) {
