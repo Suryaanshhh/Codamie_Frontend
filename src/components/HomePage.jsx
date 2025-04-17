@@ -1,8 +1,8 @@
-import React, { useEffect, useState,useRef} from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { User, Heart, HeartOff,Eye, UserPlus,MessageCircle,Send ,Calendar, MessageSquareMore, Code, Github, X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { User, Heart, HeartOff, Eye, UserPlus, MessageCircle, Send, Calendar, MessageSquareMore, Code, Github, X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
-import {jwtDecode} from "jwt-decode"
+import { jwtDecode } from "jwt-decode"
 import { io } from 'socket.io-client';
 
 
@@ -54,7 +54,7 @@ const UserProfile = () => {
       .finally(() => {
         setLoading(false);
       });
-  }, []); 
+  }, []);
 
   // Safely get the current profile
   const currentProfile = currentProfileIndex < orderedProfiles.length ? orderedProfiles[currentProfileIndex] : null;
@@ -77,7 +77,7 @@ const UserProfile = () => {
       const updatedProfiles = [...orderedProfiles];
       const profileToMove = updatedProfiles.splice(currentProfileIndex, 1)[0];
       updatedProfiles.push(profileToMove);
-      
+
       setOrderedProfiles(updatedProfiles);
       // Keep the same index - this will now show the next profile
       // unless we're at the end of the list
@@ -96,12 +96,12 @@ const UserProfile = () => {
       }).catch((error) => {
         console.error("Error creating match request:", error);
       });
-      
+
       // For right swipe, remove the profile and move to the next one
       const updatedProfiles = [...orderedProfiles];
       updatedProfiles.splice(currentProfileIndex, 1);
       setOrderedProfiles(updatedProfiles);
-      
+
       // Make sure the index doesn't go out of bounds
       if (currentProfileIndex >= updatedProfiles.length) {
         setCurrentProfileIndex(Math.max(0, updatedProfiles.length - 1));
@@ -147,17 +147,17 @@ const UserProfile = () => {
   // Check if this is a second chance profile (was previously swiped left)
   const isSecondChanceProfile = () => {
     if (!currentProfile) return false;
-    
+
     const originalIndex = originalProfiles.findIndex(p => p.id === currentProfile.id);
     const currentOrderIndex = orderedProfiles.findIndex(p => p.id === currentProfile.id);
-    
+
     return currentOrderIndex > originalIndex;
   };
 
   // Check if this profile has been viewed before
   const hasBeenViewedBefore = () => {
     if (!currentProfile) return false;
-    
+
     // If this profile is in viewedProfiles set AND it's not the first time we're viewing it
     // (we consider the first viewing as "current" not "previous")
     const profileViews = Array.from(viewedProfiles).filter(id => id === currentProfile.id).length;
@@ -204,7 +204,7 @@ const UserProfile = () => {
             </div>
           )}
         </div>
-        
+
         <div className="text-8xl animate-bounce">{currentProfile.Avatar}</div>
 
         <div className="text-center">
@@ -268,7 +268,7 @@ const UserMatches = () => {
   });
   const [message, setMessage] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
-  
+
   // Socket.io connection
   const socketRef = useRef();
   const [connected, setConnected] = useState(false);
@@ -307,7 +307,7 @@ const UserMatches = () => {
           content: messageData.content,
           timestamp: messageData.createdAt
         }]);
-        
+
         // Mark message as read
         markMessagesAsRead(messageData.senderId);
       } else {
@@ -354,16 +354,16 @@ const UserMatches = () => {
       const response = await axios.get(`https://codamie-backend.onrender.com/${recipientId}`, {
         headers: { Authorization: localStorage.getItem("token") }
       });
-      
+
       // Transform messages to the format our component uses
       const formattedMessages = response.data.messages.map(msg => ({
         sender: msg.senderId,
         content: msg.content,
         timestamp: msg.createdAt
       }));
-      
+
       setChatMessages(formattedMessages);
-      
+
       // Mark messages from this sender as read
       markMessagesAsRead(recipientId);
     } catch (error) {
@@ -389,7 +389,7 @@ const UserMatches = () => {
       recipientId,
       recipientName
     });
-    
+
     // Fetch chat history
     await fetchChatHistory(recipientId);
   };
@@ -413,17 +413,17 @@ const UserMatches = () => {
       recipientId: chatModal.recipientId,
       content: message
     };
-    
+
     // Send message through socket
     socketRef.current.emit('send_message', messageData);
-    
+
     // Add message to local state (optimistic UI update)
     const newMessage = {
       sender: currentUserID,
       content: message,
       timestamp: new Date().toISOString()
     };
-    
+
     setChatMessages([...chatMessages, newMessage]);
     setMessage("");
   };
@@ -455,26 +455,26 @@ const UserMatches = () => {
             // Determine if the current user is User1 or User2
             const isUser1 = currentUserID === match.User1;
             const isUser2 = currentUserID === match.User2;
-            
+
             // Only show matches where the current user is involved
             if (!isUser1 && !isUser2) return null;
-            
+
             // Get the name and ID of the other user
             const otherUserName = isUser1 ? match.User2Name : match.User1Name;
             const otherUserId = isUser1 ? match.User2 : match.User1;
-            
+
             // Generate a consistent color based on the name
             const nameHash = otherUserName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             const colors = ['bg-pink-100', 'bg-purple-100', 'bg-indigo-100', 'bg-blue-100', 'bg-teal-100'];
             const borderColors = ['border-pink-300', 'border-purple-300', 'border-indigo-300', 'border-blue-300', 'border-teal-300'];
             const textColors = ['text-pink-800', 'text-purple-800', 'text-indigo-800', 'text-blue-800', 'text-teal-800'];
             const buttonColors = ['bg-pink-500', 'bg-purple-500', 'bg-indigo-500', 'bg-blue-500', 'bg-teal-500'];
-            
+
             const colorIndex = nameHash % colors.length;
-            
+
             return (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className={`${colors[colorIndex]} border ${borderColors[colorIndex]} rounded-xl p-4 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1`}
               >
                 <div className="flex items-center space-x-3 mb-3">
@@ -493,7 +493,7 @@ const UserMatches = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <button
                   onClick={() => openChatModal(otherUserId, otherUserName)}
                   className={`w-full ${buttonColors[colorIndex]} hover:opacity-90 text-white py-2 px-4 rounded-lg flex items-center justify-center transition-all duration-200`}
@@ -519,29 +519,28 @@ const UserMatches = () => {
                 </div>
                 <span className="font-medium">{chatModal.recipientName}</span>
               </div>
-              <button 
+              <button
                 onClick={closeChatModal}
                 className="text-white hover:bg-indigo-700 rounded-full p-1"
               >
                 <X size={20} />
               </button>
             </div>
-            
+
             {/* Chat Messages */}
             <div className="h-64 overflow-y-auto p-4 space-y-3 bg-gray-50">
               {chatMessages.map((msg, i) => {
                 const isCurrentUser = msg.sender === currentUserID;
                 return (
-                  <div 
-                    key={i} 
+                  <div
+                    key={i}
                     className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
                   >
-                    <div 
-                      className={`max-w-xs px-4 py-2 rounded-lg shadow-sm ${
-                        isCurrentUser 
-                          ? 'bg-indigo-500 text-white' 
+                    <div
+                      className={`max-w-xs px-4 py-2 rounded-lg shadow-sm ${isCurrentUser
+                          ? 'bg-indigo-500 text-white'
                           : 'bg-white text-gray-800 border border-gray-200'
-                      }`}
+                        }`}
                     >
                       <p>{msg.content}</p>
                       <p className={`text-xs mt-1 ${isCurrentUser ? 'text-indigo-100' : 'text-gray-500'}`}>
@@ -552,7 +551,7 @@ const UserMatches = () => {
                 );
               })}
             </div>
-            
+
             {/* Message Input */}
             <form onSubmit={sendMessage} className="border-t border-gray-200 p-3 flex">
               <input
@@ -562,7 +561,7 @@ const UserMatches = () => {
                 placeholder="Type a message..."
                 className="flex-grow border border-gray-300 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
-              <button 
+              <button
                 type="submit"
                 disabled={!connected}
                 className={`${connected ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-400'} text-white px-4 py-2 rounded-r-lg transition-colors duration-200`}
@@ -599,7 +598,9 @@ const MatchRequests = () => {
         Authorization: localStorage.getItem("token")
       }
     }).then((response) => {
-      console.log(response.data)
+      if (response.data.message == "Match already exists") {
+        alert("Match already exists")
+      }
     }).catch((error) => {
       console.error("Error accepting request:", error);
     })
@@ -635,13 +636,13 @@ const MatchRequests = () => {
                   <button className="p-2 text-red-600 hover:bg-red-100 rounded-full transition-colors">
                     <HeartOff size={20} />
                   </button>
-                  <button 
-                    onClick={() => requestAccepted(request)} 
+                  <button
+                    onClick={() => requestAccepted(request)}
                     className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
                   >
                     <UserPlus size={20} />
                   </button>
-                 
+
                 </div>
               </div>
             ))
@@ -659,13 +660,13 @@ const MatchRequests = () => {
           <div className="bg-white rounded-lg overflow-hidden w-full max-w-sm shadow-lg">
             {/* Compact Header */}
             <div className="relative bg-indigo-600 py-3 px-4">
-              <button 
-                onClick={closeModal} 
+              <button
+                onClick={closeModal}
                 className="absolute right-3 top-2.5 text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1"
               >
                 <X size={18} />
               </button>
-              
+
               <div className="flex items-center space-x-3">
                 <div className="text-3xl bg-white text-indigo-600 rounded-full h-12 w-12 flex items-center justify-center">
                   {selectedProfile.Avatar}
@@ -723,13 +724,13 @@ const MatchRequests = () => {
 
             {/* Compact Actions */}
             <div className="bg-gray-50 p-3 flex space-x-2">
-              <button 
+              <button
                 onClick={closeModal}
                 className="flex-1 py-1.5 border border-gray-300 rounded text-gray-600 text-sm hover:bg-gray-100 transition-colors"
               >
                 Close
               </button>
-              <button 
+              <button
                 onClick={() => {
                   requestAccepted(selectedProfile);
                   closeModal();
@@ -753,24 +754,24 @@ const AiChatBot = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
-  
+
   // Auto scroll to bottom when messages update
   // useEffect(() => {
   //   scrollToBottom();
   // }, [messages]);
-  
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
-  
+
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
-    
+
     // Add user message
     const userMessage = { text: input, sender: 'user' };
     setMessages(prevMessages => [...prevMessages, userMessage]);
-    
+
     // Format conversation history for API
     const conversationHistory = messages
       .reduce((acc, msg, index, array) => {
@@ -782,10 +783,10 @@ const AiChatBot = () => {
         }
         return acc;
       }, []);
-    
+
     setIsLoading(true);
     setInput('');
-    
+
     try {
       const response = await fetch('https://codamie-backend.onrender.com/aiBot', {
         method: 'POST',
@@ -797,17 +798,17 @@ const AiChatBot = () => {
           conversationHistory
         }),
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       if (data.error) {
         throw new Error(data.error);
       }
-      
+
       // Add bot response
       setMessages(prevMessages => [
         ...prevMessages,
@@ -823,7 +824,7 @@ const AiChatBot = () => {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="h-[500px] flex flex-col">
       <h2 className="text-2xl font-bold mb-4 text-gray-800">Delulu Mate</h2>
@@ -841,16 +842,15 @@ const AiChatBot = () => {
           </>
         ) : (
           messages.map((message, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div 
-                className={`${
-                  message.sender === 'user' 
-                    ? 'bg-blue-600 text-white' 
+              <div
+                className={`${message.sender === 'user'
+                    ? 'bg-blue-600 text-white'
                     : 'bg-white shadow-sm'
-                } rounded-lg p-3 max-w-[80%]`}
+                  } rounded-lg p-3 max-w-[80%]`}
               >
                 {message.sender === 'bot' && <div className="text-2xl mb-2">🐾</div>}
                 {message.text}
@@ -858,7 +858,7 @@ const AiChatBot = () => {
             </div>
           ))
         )}
-        
+
         {isLoading && (
           <div className="flex justify-start">
             <div className="bg-white rounded-lg p-3 max-w-[80%] shadow-sm">
@@ -871,10 +871,10 @@ const AiChatBot = () => {
             </div>
           </div>
         )}
-        
+
         <div ref={messagesEndRef} />
       </div>
-      
+
       <form onSubmit={sendMessage} className="flex space-x-2 mt-4">
         <input
           type="text"
@@ -884,12 +884,11 @@ const AiChatBot = () => {
           className="flex-1 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={isLoading}
         />
-        <button 
+        <button
           type="submit"
           disabled={isLoading || !input.trim()}
-          className={`px-6 py-3 ${
-            isLoading || !input.trim() ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
-          } text-white rounded-lg transition-colors`}
+          className={`px-6 py-3 ${isLoading || !input.trim() ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
+            } text-white rounded-lg transition-colors`}
         >
           Send
         </button>
