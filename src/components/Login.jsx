@@ -28,9 +28,26 @@ export default function Login() {
   }
 
   function githubAuth() {
-    window.location.href = "https://codamie-backend.onrender.com/auth/github";
+    const popup = window.open(
+      "https://codamie-backend.onrender.com/auth/github",
+      "_blank",
+      "width=500,height=600"
+    );
+  
+    // Listen for postMessage from backend after GitHub OAuth
+    window.addEventListener("message", (event) => {
+      // SAFETY: Make sure the message is from your backend
+      if (event.origin !== "https://codamie-frontend.vercel.app") return;
+  
+      const { token, redirectPath } = event.data;
+  
+      if (token) {
+        localStorage.setItem("authToken", token);
+        window.location.href = `/${redirectPath}`;
+      }
+    });
   }
-
+  
 
   function loginUser() {
     if (!profileData.userEmail || !profileData.userPassword) {
