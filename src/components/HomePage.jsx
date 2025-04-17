@@ -745,34 +745,158 @@ const MatchRequests = () => {
     </div>
   );
 };
-const AiChatBot = () => (
-  <div className="h-[500px] flex flex-col">
-    <h2 className="text-2xl font-bold mb-4 text-gray-800">Code Assistant</h2>
-    <div className="flex-1 bg-gray-50 rounded-lg p-4 overflow-y-auto space-y-4">
-      <div className="flex justify-end">
-        <div className="bg-blue-600 text-white rounded-lg p-3 max-w-[80%]">
-          Hey! I need help with a React component. 🤔
-        </div>
+
+
+
+const AiChatBot = () => {
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+  
+  // Auto scroll to bottom when messages update
+  // useEffect(() => {
+  //   scrollToBottom();
+  // }, [messages]);
+  
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    
+    // Add user message
+    const userMessage = { text: input, sender: 'user' };
+    setMessages(prevMessages => [...prevMessages, userMessage]);
+    
+    // Format conversation history for API
+    const conversationHistory = messages
+      .reduce((acc, msg, index, array) => {
+        if (msg.sender === 'user' && index + 1 < array.length && array[index + 1].sender === 'bot') {
+          acc.push({
+            user: msg.text,
+            bot: array[index + 1].text
+          });
+        }
+        return acc;
+      }, []);
+    
+    setIsLoading(true);
+    setInput('');
+    
+    try {
+      const response = await fetch('http://localhost:3000/aiBot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: input,
+          conversationHistory
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      // Add bot response
+      setMessages(prevMessages => [
+        ...prevMessages,
+        { text: data.generated_text, sender: 'bot' }
+      ]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setMessages(prevMessages => [
+        ...prevMessages,
+        { text: "I'm having trouble connecting right now. Please try again later.", sender: 'bot' }
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  return (
+    <div className="h-[500px] flex flex-col">
+      <h2 className="text-2xl font-bold mb-4 text-gray-800">Delulu Mate</h2>
+      <div className="flex-1 bg-gray-50 rounded-lg p-4 overflow-y-auto space-y-4">
+        {messages.length === 0 ? (
+          <>
+            <div className="flex justify-end">
+            </div>
+            <div className="flex justify-start">
+              <div className="bg-white rounded-lg p-3 max-w-[80%] shadow-sm">
+                <div className="text-2xl mb-2">🐾</div>
+                I am your AI soulmate! Here to help you with improving your mental health.
+              </div>
+            </div>
+          </>
+        ) : (
+          messages.map((message, index) => (
+            <div 
+              key={index} 
+              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div 
+                className={`${
+                  message.sender === 'user' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-white shadow-sm'
+                } rounded-lg p-3 max-w-[80%]`}
+              >
+                {message.sender === 'bot' && <div className="text-2xl mb-2">🐾</div>}
+                {message.text}
+              </div>
+            </div>
+          ))
+        )}
+        
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="bg-white rounded-lg p-3 max-w-[80%] shadow-sm">
+              <div className="text-2xl mb-2">🐾</div>
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '200ms' }}></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '400ms' }}></div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        <div ref={messagesEndRef} />
       </div>
-      <div className="flex justify-start">
-        <div className="bg-white rounded-lg p-3 max-w-[80%] shadow-sm">
-          <div className="text-2xl mb-2">🤖</div>
-          I'd be happy to help! What specific part of React are you working with?
-        </div>
-      </div>
+      
+      <form onSubmit={sendMessage} className="flex space-x-2 mt-4">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask anything about coding..."
+          className="flex-1 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          disabled={isLoading}
+        />
+        <button 
+          type="submit"
+          disabled={isLoading || !input.trim()}
+          className={`px-6 py-3 ${
+            isLoading || !input.trim() ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
+          } text-white rounded-lg transition-colors`}
+        >
+          Send
+        </button>
+      </form>
     </div>
-    <div className="flex space-x-2 mt-4">
-      <input
-        type="text"
-        placeholder="Ask anything about coding..."
-        className="flex-1 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-      <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-        Send
-      </button>
-    </div>
-  </div>
-);
+  );
+};
 
 function App() {
   const [activeTab, setActiveTab] = useState('profile');
