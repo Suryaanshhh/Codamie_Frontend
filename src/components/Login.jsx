@@ -34,10 +34,13 @@ export default function Login() {
       "width=500,height=600"
     );
   
-    // Listen for postMessage from backend after GitHub OAuth
-    window.addEventListener("message", (event) => {
-      // SAFETY: Make sure the message is from your backend
-      if (event.origin !== "https://codamie-frontend.vercel.app") return;
+    // Define the listener outside so it doesn't get re-added every time
+    const handleMessage = (event) => {
+      // ✅ Make sure the event is from YOUR BACKEND (not frontend!)
+      if (event.origin !== "https://codamie-backend.onrender.com") {
+        console.warn("Invalid origin:", event.origin);
+        return;
+      }
   
       const { token, redirectPath } = event.data;
   
@@ -45,8 +48,20 @@ export default function Login() {
         localStorage.setItem("authToken", token);
         window.location.href = `/${redirectPath}`;
       }
-    });
+    };
+  
+    // ✅ Attach the listener ONCE
+    window.addEventListener("message", handleMessage, false);
+  
+    // Optional: Remove the listener once message is received
+    const removeListenerOnClose = setInterval(() => {
+      if (popup.closed) {
+        window.removeEventListener("message", handleMessage);
+        clearInterval(removeListenerOnClose);
+      }
+    }, 500);
   }
+  
   
 
   function loginUser() {
