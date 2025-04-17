@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useRef} from 'react';
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { User, Heart, HeartOff,Eye, UserPlus, MessageSquareMore, Code, Github, X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { User, Heart, HeartOff,Eye, UserPlus,MessageCircle,Send ,Calendar, MessageSquareMore, Code, Github, X, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import axios from 'axios';
 import {jwtDecode} from "jwt-decode"
-
+import { io } from 'socket.io-client';
 
 
 
@@ -255,10 +255,84 @@ const UserProfile = () => {
 };
 
 
+
+
+
 const UserMatches = () => {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [chatModal, setChatModal] = useState({
+    isOpen: false,
+    recipientId: null,
+    recipientName: ""
+  });
+  const [message, setMessage] = useState("");
+  const [chatMessages, setChatMessages] = useState([]);
+  
+  // Socket.io connection
+  const socketRef = useRef();
+  const [connected, setConnected] = useState(false);
 
+  // Get the current user's ID from the token
+  const token = localStorage.getItem("token");
+  const decoded = token ? jwtDecode(token) : { userID: null };
+  const currentUserID = decoded.userID;
+
+  // Initialize socket connection
+  useEffect(() => {
+    // Create socket connection
+    socketRef.current = io('http://localhost:3000', {
+      auth: {
+        token: localStorage.getItem('token')
+      }
+    });
+
+    // Socket connection events
+    socketRef.current.on('connect', () => {
+      console.log('Connected to socket server');
+      setConnected(true);
+    });
+
+    socketRef.current.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+      setConnected(false);
+    });
+
+    // Listen for incoming messages
+    socketRef.current.on('receive_message', (messageData) => {
+      if (chatModal.isOpen && chatModal.recipientId === messageData.senderId) {
+        // Add message to chat if the chat with this user is open
+        setChatMessages(prevMessages => [...prevMessages, {
+          sender: messageData.senderId,
+          content: messageData.content,
+          timestamp: messageData.createdAt
+        }]);
+        
+        // Mark message as read
+        markMessagesAsRead(messageData.senderId);
+      } else {
+        // Could add notification logic here when receiving a message
+        // and the chat is not open with that user
+        console.log('New message received:', messageData);
+      }
+    });
+
+    socketRef.current.on('message_sent', (response) => {
+      if (!response.success) {
+        console.error('Error sending message:', response.error);
+        // Could add error handling UI here
+      }
+    });
+
+    // Clean up on unmount
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
+  }, [chatModal]);
+
+  // Fetch matches
   useEffect(() => {
     axios
       .get("http://localhost:3000/matchList", {
@@ -274,10 +348,85 @@ const UserMatches = () => {
       });
   }, []);
 
-  // Get the current user's ID from the token
-  const token = localStorage.getItem("token");
-  const decoded = token ? jwtDecode(token) : { userID: null };
-  const currentUserID = decoded.userID;
+  // Fetch chat history when opening chat
+  const fetchChatHistory = async (recipientId) => {
+    try {
+      const response = await axios.get(`http://localhost:3000/${recipientId}`, {
+        headers: { Authorization: localStorage.getItem("token") }
+      });
+      
+      // Transform messages to the format our component uses
+      const formattedMessages = response.data.messages.map(msg => ({
+        sender: msg.senderId,
+        content: msg.content,
+        timestamp: msg.createdAt
+      }));
+      
+      setChatMessages(formattedMessages);
+      
+      // Mark messages from this sender as read
+      markMessagesAsRead(recipientId);
+    } catch (error) {
+      console.error('Error fetching chat history:', error);
+      setChatMessages([]);
+    }
+  };
+
+  // Mark messages as read
+  const markMessagesAsRead = async (senderId) => {
+    try {
+      await axios.put(`http://localhost:3000/read/${senderId}`, {}, {
+        headers: { Authorization: localStorage.getItem("token") }
+      });
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+    }
+  };
+
+  const openChatModal = async (recipientId, recipientName) => {
+    setChatModal({
+      isOpen: true,
+      recipientId,
+      recipientName
+    });
+    
+    // Fetch chat history
+    await fetchChatHistory(recipientId);
+  };
+
+  const closeChatModal = () => {
+    setChatModal({
+      isOpen: false,
+      recipientId: null,
+      recipientName: ""
+    });
+    setMessage("");
+  };
+
+  const sendMessage = (e) => {
+    e.preventDefault();
+    if (!message.trim() || !connected) return;
+
+    // Create message object
+    const messageData = {
+      senderId: currentUserID,
+      recipientId: chatModal.recipientId,
+      content: message
+    };
+    
+    // Send message through socket
+    socketRef.current.emit('send_message', messageData);
+    
+    // Add message to local state (optimistic UI update)
+    const newMessage = {
+      sender: currentUserID,
+      content: message,
+      timestamp: new Date().toISOString()
+    };
+    
+    setChatMessages([...chatMessages, newMessage]);
+    setMessage("");
+  };
 
   if (loading) {
     return (
@@ -310,14 +459,16 @@ const UserMatches = () => {
             // Only show matches where the current user is involved
             if (!isUser1 && !isUser2) return null;
             
-            // Get the name of the other user
+            // Get the name and ID of the other user
             const otherUserName = isUser1 ? match.User2Name : match.User1Name;
+            const otherUserId = isUser1 ? match.User2 : match.User1;
             
             // Generate a consistent color based on the name
             const nameHash = otherUserName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             const colors = ['bg-pink-100', 'bg-purple-100', 'bg-indigo-100', 'bg-blue-100', 'bg-teal-100'];
             const borderColors = ['border-pink-300', 'border-purple-300', 'border-indigo-300', 'border-blue-300', 'border-teal-300'];
             const textColors = ['text-pink-800', 'text-purple-800', 'text-indigo-800', 'text-blue-800', 'text-teal-800'];
+            const buttonColors = ['bg-pink-500', 'bg-purple-500', 'bg-indigo-500', 'bg-blue-500', 'bg-teal-500'];
             
             const colorIndex = nameHash % colors.length;
             
@@ -326,27 +477,121 @@ const UserMatches = () => {
                 key={index} 
                 className={`${colors[colorIndex]} border ${borderColors[colorIndex]} rounded-xl p-4 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1`}
               >
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 mb-3">
                   <div className="flex-shrink-0">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center bg-white ${textColors[colorIndex]}`}>
                       {otherUserName.charAt(0).toUpperCase()}
                     </div>
                   </div>
-                  <div>
+                  <div className="flex-grow">
                     <p className={`font-medium ${textColors[colorIndex]}`}>{otherUserName}</p>
-                    <p className="text-xs text-gray-500">Perfect Match</p>
+                    <div className="flex items-center">
+                      <p className="text-xs text-gray-500">Perfect Match</p>
+                      {match.isOnline && (
+                        <span className="ml-2 h-2 w-2 rounded-full bg-green-500"></span>
+                      )}
+                    </div>
                   </div>
                 </div>
+                
+                <button
+                  onClick={() => openChatModal(otherUserId, otherUserName)}
+                  className={`w-full ${buttonColors[colorIndex]} hover:opacity-90 text-white py-2 px-4 rounded-lg flex items-center justify-center transition-all duration-200`}
+                >
+                  <MessageCircle size={16} className="mr-2" />
+                  <span>Send Message</span>
+                </button>
               </div>
             );
           })}
         </div>
       </div>
+
+      {/* Chat Modal */}
+      {chatModal.isOpen && (
+        <div className="fixed inset-0 bg-indigo-100 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-indigo-600 text-white px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-full bg-white text-indigo-600 flex items-center justify-center font-medium">
+                  {chatModal.recipientName.charAt(0).toUpperCase()}
+                </div>
+                <span className="font-medium">{chatModal.recipientName}</span>
+              </div>
+              <button 
+                onClick={closeChatModal}
+                className="text-white hover:bg-indigo-700 rounded-full p-1"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            {/* Chat Messages */}
+            <div className="h-64 overflow-y-auto p-4 space-y-3 bg-gray-50">
+              {chatMessages.map((msg, i) => {
+                const isCurrentUser = msg.sender === currentUserID;
+                return (
+                  <div 
+                    key={i} 
+                    className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div 
+                      className={`max-w-xs px-4 py-2 rounded-lg shadow-sm ${
+                        isCurrentUser 
+                          ? 'bg-indigo-500 text-white' 
+                          : 'bg-white text-gray-800 border border-gray-200'
+                      }`}
+                    >
+                      <p>{msg.content}</p>
+                      <p className={`text-xs mt-1 ${isCurrentUser ? 'text-indigo-100' : 'text-gray-500'}`}>
+                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Message Input */}
+            <form onSubmit={sendMessage} className="border-t border-gray-200 p-3 flex">
+              <input
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Type a message..."
+                className="flex-grow border border-gray-300 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+              <button 
+                type="submit"
+                disabled={!connected}
+                className={`${connected ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-gray-400'} text-white px-4 py-2 rounded-r-lg transition-colors duration-200`}
+              >
+                <Send size={18} />
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
+
+
 const MatchRequests = () => {
+  const [requests, setRequests] = useState([]);
+  const [selectedProfile, setSelectedProfile] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+  function viewProfile(data) {
+    setSelectedProfile(data);
+    setShowModal(true);
+  }
+
+  function closeModal() {
+    setShowModal(false);
+  }
 
   function requestAccepted(data) {
     axios.post("http://localhost:3000/addToMatch", data, {
@@ -359,8 +604,6 @@ const MatchRequests = () => {
       console.error("Error accepting request:", error);
     })
   }
-
-  const [requests, setRequests] = useState([]);
 
   useEffect(() => {
     axios.get("http://localhost:3000/showMatchRequests", {
@@ -375,63 +618,285 @@ const MatchRequests = () => {
     })
   }, [])
 
-  return <div className="h-[500px] overflow-y-auto">
-    <h2 className="text-2xl font-bold mb-4 text-gray-800">Connection Requests</h2>
-    <div className="space-y-4">
-      {requests.length > 0 ? (
-        requests.map((request, index) => (
-          <div key={index} className="bg-white rounded-lg p-4 flex items-center space-x-4">
-            <div className="text-4xl">{request.Avatar}</div>
-            <div className="flex-1">
-              <h3 className="font-medium text-gray-800">{request.Name}, {request.Age}</h3>
-              <p className="text-sm text-blue-600">{request.devType}</p>
+  return (
+    <div className="relative">
+      <div className="h-96 overflow-y-auto">
+        <h2 className="text-2xl font-bold mb-4 text-gray-800">Connection Requests</h2>
+        <div className="space-y-4">
+          {requests.length > 0 ? (
+            requests.map((request, index) => (
+              <div key={index} className="bg-white rounded-lg p-4 flex items-center space-x-4 shadow-sm hover:shadow transition-all">
+                <div className="text-4xl">{request.Avatar}</div>
+                <div className="flex-1">
+                  <h3 className="font-medium text-gray-800">{request.Name}, {request.Age}</h3>
+                  <p className="text-sm text-blue-600">{request.devType}</p>
+                </div>
+                <div className="flex space-x-2">
+                  <button className="p-2 text-red-600 hover:bg-red-100 rounded-full transition-colors">
+                    <HeartOff size={20} />
+                  </button>
+                  <button 
+                    onClick={() => requestAccepted(request)} 
+                    className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+                  >
+                    <UserPlus size={20} />
+                  </button>
+                 
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="bg-white rounded-lg p-6 text-center shadow-sm">
+              <p className="text-gray-500">No connection requests available</p>
             </div>
-            <div className="flex space-x-2">
-              <button className="p-2 text-red-600 hover:bg-red-200 rounded-full transition-colors">
-                <HeartOff size={20} />
+          )}
+        </div>
+      </div>
+
+      {/* Compact Profile Modal */}
+      {showModal && selectedProfile && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg overflow-hidden w-full max-w-sm shadow-lg">
+            {/* Compact Header */}
+            <div className="relative bg-indigo-600 py-3 px-4">
+              <button 
+                onClick={closeModal} 
+                className="absolute right-3 top-2.5 text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1"
+              >
+                <X size={18} />
               </button>
-              <button onClick={() => requestAccepted(request)} className="p-2 text-gray-600 hover:bg-gray-200 rounded-full transition-colors">
-                <UserPlus size={20} />
+              
+              <div className="flex items-center space-x-3">
+                <div className="text-3xl bg-white text-indigo-600 rounded-full h-12 w-12 flex items-center justify-center">
+                  {selectedProfile.Avatar}
+                </div>
+                <div className="text-white">
+                  <h2 className="text-lg font-semibold">{selectedProfile.Name}, {selectedProfile.Age}</h2>
+                  <div className="flex items-center mt-0.5">
+                    <span className="text-xs bg-white bg-opacity-20 px-2 py-0.5 rounded-full">
+                      {selectedProfile.devType}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Compact Content */}
+            <div className="p-4 max-h-72 overflow-y-auto">
+              {/* Basic Info */}
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div className="flex items-center">
+                  <User size={16} className="text-indigo-500 mr-2" />
+                  <div>
+                    <p className="text-xs text-gray-500">Gender</p>
+                    <p className="text-sm font-medium">{selectedProfile.Gender}</p>
+                  </div>
+                </div>
+                <div className="flex items-center">
+                  <Code size={16} className="text-indigo-500 mr-2" />
+                  <div>
+                    <p className="text-xs text-gray-500">Language</p>
+                    <p className="text-sm font-medium">{selectedProfile.CodingLanguage}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bio (if exists) */}
+              {selectedProfile.Biodata && (
+                <div className="mb-3">
+                  <h3 className="text-xs uppercase text-gray-500 font-semibold mb-1">Bio</h3>
+                  <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded">
+                    {selectedProfile.Biodata}
+                  </p>
+                </div>
+              )}
+
+              {/* Member Since */}
+              <div className="flex items-center text-xs text-gray-500 mt-2">
+                <Calendar size={14} className="mr-1.5" />
+                Member since {new Date(selectedProfile.createdAt).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short'
+                })}
+              </div>
+            </div>
+
+            {/* Compact Actions */}
+            <div className="bg-gray-50 p-3 flex space-x-2">
+              <button 
+                onClick={closeModal}
+                className="flex-1 py-1.5 border border-gray-300 rounded text-gray-600 text-sm hover:bg-gray-100 transition-colors"
+              >
+                Close
+              </button>
+              <button 
+                onClick={() => {
+                  requestAccepted(selectedProfile);
+                  closeModal();
+                }}
+                className="flex-1 py-1.5 bg-indigo-600 rounded text-white text-sm hover:bg-indigo-700 transition-colors"
+              >
+                Accept
               </button>
             </div>
           </div>
-        ))
-      ) : (
-        <div className="bg-white rounded-lg p-6 text-center">
-          <p className="text-gray-500">No connection requests available</p>
         </div>
       )}
     </div>
-  </div>
+  );
 };
-const AiChatBot = () => (
-  <div className="h-[500px] flex flex-col">
-    <h2 className="text-2xl font-bold mb-4 text-gray-800">Code Assistant</h2>
-    <div className="flex-1 bg-gray-50 rounded-lg p-4 overflow-y-auto space-y-4">
-      <div className="flex justify-end">
-        <div className="bg-blue-600 text-white rounded-lg p-3 max-w-[80%]">
-          Hey! I need help with a React component. 🤔
-        </div>
+
+
+
+const AiChatBot = () => {
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+  
+  // Auto scroll to bottom when messages update
+  // useEffect(() => {
+  //   scrollToBottom();
+  // }, [messages]);
+  
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    
+    // Add user message
+    const userMessage = { text: input, sender: 'user' };
+    setMessages(prevMessages => [...prevMessages, userMessage]);
+    
+    // Format conversation history for API
+    const conversationHistory = messages
+      .reduce((acc, msg, index, array) => {
+        if (msg.sender === 'user' && index + 1 < array.length && array[index + 1].sender === 'bot') {
+          acc.push({
+            user: msg.text,
+            bot: array[index + 1].text
+          });
+        }
+        return acc;
+      }, []);
+    
+    setIsLoading(true);
+    setInput('');
+    
+    try {
+      const response = await fetch('http://localhost:3000/aiBot', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: input,
+          conversationHistory
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      // Add bot response
+      setMessages(prevMessages => [
+        ...prevMessages,
+        { text: data.generated_text, sender: 'bot' }
+      ]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setMessages(prevMessages => [
+        ...prevMessages,
+        { text: "I'm having trouble connecting right now. Please try again later.", sender: 'bot' }
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  return (
+    <div className="h-[500px] flex flex-col">
+      <h2 className="text-2xl font-bold mb-4 text-gray-800">Delulu Mate</h2>
+      <div className="flex-1 bg-gray-50 rounded-lg p-4 overflow-y-auto space-y-4">
+        {messages.length === 0 ? (
+          <>
+            <div className="flex justify-end">
+            </div>
+            <div className="flex justify-start">
+              <div className="bg-white rounded-lg p-3 max-w-[80%] shadow-sm">
+                <div className="text-2xl mb-2">🐾</div>
+                I am your AI soulmate! Here to help you with improving your mental health.
+              </div>
+            </div>
+          </>
+        ) : (
+          messages.map((message, index) => (
+            <div 
+              key={index} 
+              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div 
+                className={`${
+                  message.sender === 'user' 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-white shadow-sm'
+                } rounded-lg p-3 max-w-[80%]`}
+              >
+                {message.sender === 'bot' && <div className="text-2xl mb-2">🐾</div>}
+                {message.text}
+              </div>
+            </div>
+          ))
+        )}
+        
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="bg-white rounded-lg p-3 max-w-[80%] shadow-sm">
+              <div className="text-2xl mb-2">🐾</div>
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '200ms' }}></div>
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '400ms' }}></div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        <div ref={messagesEndRef} />
       </div>
-      <div className="flex justify-start">
-        <div className="bg-white rounded-lg p-3 max-w-[80%] shadow-sm">
-          <div className="text-2xl mb-2">🤖</div>
-          I'd be happy to help! What specific part of React are you working with?
-        </div>
-      </div>
+      
+      <form onSubmit={sendMessage} className="flex space-x-2 mt-4">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask anything about coding..."
+          className="flex-1 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          disabled={isLoading}
+        />
+        <button 
+          type="submit"
+          disabled={isLoading || !input.trim()}
+          className={`px-6 py-3 ${
+            isLoading || !input.trim() ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
+          } text-white rounded-lg transition-colors`}
+        >
+          Send
+        </button>
+      </form>
     </div>
-    <div className="flex space-x-2 mt-4">
-      <input
-        type="text"
-        placeholder="Ask anything about coding..."
-        className="flex-1 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-      <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-        Send
-      </button>
-    </div>
-  </div>
-);
+  );
+};
 
 function App() {
   const [activeTab, setActiveTab] = useState('profile');
@@ -459,7 +924,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-6 p-8">
       <div className="max-w-2xl mx-auto">
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden">
           <div className="grid grid-cols-4 border-b bg-white">
