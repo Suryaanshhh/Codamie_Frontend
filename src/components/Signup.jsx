@@ -16,7 +16,7 @@ export default function Signup() {
 
 
   function githubAuth() {
-    window.location.href = "http://codamie-backend.onrender.com/auth/github";
+    window.location.href = "https://codamie-backend.onrender.com/auth/github";
   }
 
   function submit() {
@@ -25,7 +25,7 @@ export default function Signup() {
     }
     else {
     
-        axios.post("http://codamie-backend.onrender.com/registerUser", Data).then((res) => {
+        axios.post("https://codamie-backend.onrender.com/registerUser", Data).then((res) => {
           console.log(res)
           alert("user Registered")
         navigate("/login")

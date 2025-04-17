@@ -5,7 +5,7 @@ import App from './App.jsx'
 import axios from "axios";
 
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = "http://codamie-backend.onrender.com";
+axios.defaults.baseURL = "https://codamie-backend.onrender.com";
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />

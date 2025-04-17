@@ -103,7 +103,7 @@ export default function UserProfile() {
     }
 
 
-    axios.post("http://codamie-backend.onrender.com/createUserProfile", data, {
+    axios.post("https://codamie-backend.onrender.com/createUserProfile", data, {
       withCredentials: true,
       headers: {
         Authorization: localStorage.getItem("token")
@@ -121,7 +121,7 @@ export default function UserProfile() {
     <section className="py-16 bg-indigo-50 px-4">
       <div className="container mx-auto">
         <h2 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
-          Create Your Coding Profile
+          Create Your Coding Profile.
         </h2>
 
         <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 max-w-2xl mx-auto">
