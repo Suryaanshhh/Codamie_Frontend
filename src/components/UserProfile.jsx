@@ -86,11 +86,14 @@ export default function UserProfile() {
   // Handle age input
   const handleAgeChange = (e) => {
     const value = e.target.value;
-    if (value === '' || (parseInt(value) >= 18 && parseInt(value) <= 100)) {
+  
+    
+    const regex = /^\d*$/;
+  
+    if (regex.test(value)) {
       setAge(value);
     }
   };
-
 
   function createProfile() {
     const data = {
@@ -186,12 +189,11 @@ export default function UserProfile() {
                       Age
                     </label>
                     <input
-                      type="number"
+                      type='text'
                       id="age"
                       value={age}
                       onChange={handleAgeChange}
-                      min="18"
-                      max="100"
+                      
                       placeholder="Enter age"
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 py-2 px-3 text-gray-700 bg-white border border-gray-300"
                     />
