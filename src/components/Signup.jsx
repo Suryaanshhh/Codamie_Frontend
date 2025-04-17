@@ -33,7 +33,7 @@ export default function Signup() {
       const { token, redirectPath } = event.data;
   
       if (token) {
-        localStorage.setItem("authToken", token);
+        localStorage.setItem("token", token);
         window.location.href = `/${redirectPath}`;
       }
     };
