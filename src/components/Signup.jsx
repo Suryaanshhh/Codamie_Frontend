@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import axios from "axios";
 export default function Signup() {
+  const navigate=useNavigate()
   const [fullName, setFullName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -13,7 +16,7 @@ export default function Signup() {
 
 
   function githubAuth() {
-    window.location.href = "http://localhost:3000/auth/github";
+    window.location.href = "http://codamiebackend-production.up.railway.app/auth/github";
   }
 
   function submit() {
@@ -22,9 +25,10 @@ export default function Signup() {
     }
     else {
     
-        axios.post("http://localhost:3000/registerUser", Data).then((res) => {
+        axios.post("http://codamiebackend-production.up.railway.app/registerUser", Data).then((res) => {
           console.log(res)
           alert("user Registered")
+        navigate("/login")
         }).then((err) => {
           console.log(err)
         })

@@ -32,7 +32,7 @@ const UserProfile = () => {
     setLoading(true);
     setError(null);
 
-    axios.get("http://localhost:3000/showprofiles", {
+    axios.get("http://codamiebackend-production.up.railway.app/showprofiles", {
       headers: {
         Authorization: localStorage.getItem("token")
       }
@@ -87,7 +87,7 @@ const UserProfile = () => {
     } else if (direction === "right") {
       // Handle right swipe - create match request
       const Personid = { id: currentProfile.UserId };
-      axios.post("http://localhost:3000/createMatchRequest", Personid, {
+      axios.post("http://codamiebackend-production.up.railway.app/createMatchRequest", Personid, {
         headers: {
           Authorization: localStorage.getItem("token")
         }
@@ -281,7 +281,7 @@ const UserMatches = () => {
   // Initialize socket connection
   useEffect(() => {
     // Create socket connection
-    socketRef.current = io('http://localhost:3000', {
+    socketRef.current = io('http://codamiebackend-production.up.railway.app', {
       auth: {
         token: localStorage.getItem('token')
       }
@@ -335,7 +335,7 @@ const UserMatches = () => {
   // Fetch matches
   useEffect(() => {
     axios
-      .get("http://localhost:3000/matchList", {
+      .get("http://codamiebackend-production.up.railway.app/matchList", {
         headers: { Authorization: localStorage.getItem("token") }
       })
       .then((response) => {
@@ -351,7 +351,7 @@ const UserMatches = () => {
   // Fetch chat history when opening chat
   const fetchChatHistory = async (recipientId) => {
     try {
-      const response = await axios.get(`http://localhost:3000/${recipientId}`, {
+      const response = await axios.get(`http://codamiebackend-production.up.railway.app/${recipientId}`, {
         headers: { Authorization: localStorage.getItem("token") }
       });
       
@@ -375,7 +375,7 @@ const UserMatches = () => {
   // Mark messages as read
   const markMessagesAsRead = async (senderId) => {
     try {
-      await axios.put(`http://localhost:3000/read/${senderId}`, {}, {
+      await axios.put(`http://codamiebackend-production.up.railway.app/read/${senderId}`, {}, {
         headers: { Authorization: localStorage.getItem("token") }
       });
     } catch (error) {
@@ -594,7 +594,7 @@ const MatchRequests = () => {
   }
 
   function requestAccepted(data) {
-    axios.post("http://localhost:3000/addToMatch", data, {
+    axios.post("http://codamiebackend-production.up.railway.app/addToMatch", data, {
       headers: {
         Authorization: localStorage.getItem("token")
       }
@@ -606,7 +606,7 @@ const MatchRequests = () => {
   }
 
   useEffect(() => {
-    axios.get("http://localhost:3000/showMatchRequests", {
+    axios.get("http://codamiebackend-production.up.railway.app/showMatchRequests", {
       headers: {
         Authorization: localStorage.getItem("token")
       }
@@ -787,7 +787,7 @@ const AiChatBot = () => {
     setInput('');
     
     try {
-      const response = await fetch('http://localhost:3000/aiBot', {
+      const response = await fetch('http://codamiebackend-production.up.railway.app/aiBot', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

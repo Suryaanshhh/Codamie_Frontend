@@ -7,13 +7,33 @@ export default function Header() {
 
   useEffect(() => {
     // Check for token in localStorage when component mounts
-    const token = localStorage.getItem('token');
-    setIsLoggedIn(token !== null);
+    const checkLoginStatus = () => {
+      const token = localStorage.getItem('token');
+      setIsLoggedIn(token !== null);
+    };
+    
+    // Initial check
+    checkLoginStatus();
+    
+    // Listen for storage events
+    window.addEventListener('storage', checkLoginStatus);
+    
+    // Create a custom event listener for local changes
+    window.addEventListener('localStorageChange', checkLoginStatus);
+    
+    return () => {
+      window.removeEventListener('storage', checkLoginStatus);
+      window.removeEventListener('localStorageChange', checkLoginStatus);
+    };
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
+    
+    // Dispatch a custom event to notify other components
+    window.dispatchEvent(new Event('localStorageChange'));
+    
     navigate("/login");
   };
 

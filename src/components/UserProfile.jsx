@@ -103,7 +103,7 @@ export default function UserProfile() {
     }
 
 
-    axios.post("http://localhost:3000/createUserProfile", data, {
+    axios.post("http://codamiebackend-production.up.railway.app/createUserProfile", data, {
       headers: {
         Authorization: localStorage.getItem("token")
       }

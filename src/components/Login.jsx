@@ -28,7 +28,7 @@ export default function Login() {
   }
 
   function githubAuth() {
-    window.location.href = "http://localhost:3000/auth/github";
+    window.location.href = "http://codamiebackend-production.up.railway.app/auth/github";
   }
 
 
@@ -38,7 +38,7 @@ export default function Login() {
     }
     else {
 
-      axios.post("http://localhost:3000/loginUser", profileData).then((res) => {
+      axios.post("http://codamiebackend-production.up.railway.app/loginUser", profileData).then((res) => {
         const jwtToken = res.data.jsonWebToken;
         console.log(jwtToken)
         if (jwtToken) {
@@ -52,6 +52,7 @@ export default function Login() {
           navigate("/home")
         }
         else {
+          window.dispatchEvent(new Event('localStorageChange'));
           navigate("/createProfile")
         }
       }).catch((err) => {
