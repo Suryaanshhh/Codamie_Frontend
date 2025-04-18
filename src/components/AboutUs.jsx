@@ -14,7 +14,7 @@ export function AboutUs() {
           <div>
             <h3 className="text-2xl font-bold mb-4 text-gray-900">We believe in <span className="bg-gradient-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">code-compatibility</span></h3>
             <p className="text-gray-600 mb-6">
-              Founded in 2025 by a of developer who never found love through shared coding projects,
+              Founded in 2025 by a  developer who never found love through shared coding projects,
               Codamie was born from the simple idea that genuine connections can form when people
               share a passion for building and creating together.
             </p>
@@ -54,7 +54,7 @@ export function AboutUs() {
 
           <div className=" grid md:grid-cols-3 gap-8r">
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="h-48 bg-gray-200"></div>
+              
               <div className="p-6">
                 <h4 className="font-bold text-lg mb-1">Suryansh Dwivedi</h4>
                 <p className="text-indigo-600 text-sm mb-3">Founder & CEO</p>
